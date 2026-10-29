@@ -137,7 +137,7 @@
   <li>Discrete inputs (02) and input registers (04) are read-only.</li>
   <li>Write windows (05, 06, 15, 16): changes the value that the window writes. See <a href="#write-windows">write windows</a>.</li>
 </ul>
-<p>When a 32 or 64-bit format starts at a cell, the following cells it covers stay empty.</p>
+<p>A 32-bit value takes two registers and a 64-bit value four. The value is shown in its first cell. The other registers it covers are shown in grey with their raw hex content and the address the value starts at, for example <code>0x0000   (part of 40001)</code>. Selecting such a grey cell acts on the whole value: a new format, scaling, colors, a chart link or a write apply to the value from its first register. Set the first cell back to a 16-bit format to see each register on its own again.</p>
 <p>Press <kbd>F1</kbd> in any dialog to open the matching chapter of this manual.</p>
 
 <h2 id="connection">4. Connection setup</h2>

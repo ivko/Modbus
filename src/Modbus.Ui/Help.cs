@@ -24,7 +24,7 @@ public static class Help
         try
         {
             // ShellExecute drops "#fragment" from file URLs, so open a tiny redirect page instead.
-            var redirect = Path.Combine(Path.GetTempPath(), "ModbusMaster-help.html");
+            var redirect = Path.Combine(Path.GetTempPath(), "Modbus-help.html");
             File.WriteAllText(redirect,
                 $"<!doctype html><meta charset=\"utf-8\"><meta http-equiv=\"refresh\" content=\"0;url={target}\"><title>Modbus Master help</title>");
             Process.Start(new ProcessStartInfo(redirect) { UseShellExecute = true });

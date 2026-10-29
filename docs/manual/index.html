@@ -583,7 +583,7 @@ print(json.loads(out.stdout)["values"])</pre>
 
 <h2 id="library">21. .NET library</h2>
 <p><code>Modbus.Core.dll</code> contains the whole Modbus engine. Use it from C#, F# or PowerShell for scripts that need more than mbm offers.</p>
-<pre>Add-Type -Path "C:\path\to\ModbusMaster\Modbus.Core.dll"
+<pre>Add-Type -Path "&lt;program folder&gt;\Modbus.Core.dll"
 $s = [Modbus.Core.ConnectionSettings]::new()
 $s.Kind = "Tcp"; $s.Host = "192.168.1.10"; $s.Port = 502
 $c = [Modbus.Core.ModbusConnection]::Create($s)

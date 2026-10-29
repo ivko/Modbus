@@ -1,3 +1,7 @@
+using ModbusMaster.Ui.Automation;
+using ModbusMaster.Ui.Views;
+using ModbusMaster.Ui.Dialogs;
+using ModbusMaster.Ui;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
@@ -8,7 +12,6 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Win32;
-using ModbusMaster.App.Ui;
 using ModbusMaster.Core;
 using ModbusMaster.Core.Polling;
 using ModbusMaster.Core.Protocol;

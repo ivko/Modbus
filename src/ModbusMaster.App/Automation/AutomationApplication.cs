@@ -1,3 +1,7 @@
+using ModbusMaster.Ui.Automation;
+using ModbusMaster.Ui.Views;
+using ModbusMaster.Ui.Dialogs;
+using ModbusMaster.Ui;
 using System.IO.Ports;
 using System.Windows;
 using ModbusMaster.App.Views;
@@ -38,7 +42,7 @@ public sealed class AutomationApplication : DispatchTarget
         new DispMember { Name = "OpenConnection", DispId = 14, Get = _ => OpenConnection() },
         new DispMember { Name = "CloseConnection", DispId = 15, Get = _ => { OnUi(() => AppState.Current.Disconnect()); return (short)0; } },
         Prop("RemoveEcho", 16, () => (short)(Cfg.RemoveEcho ? 1 : 0), v => Cfg.RemoveEcho = I(v) != 0),
-        new DispMember { Name = "ShowCommunicationTraffic", DispId = 17, ReturnsValue = false, Get = _ => { OnUi(TrafficWindow.ShowSingle); return null; } },
+        new DispMember { Name = "ShowCommunicationTraffic", DispId = 17, ReturnsValue = false, Get = _ => { OnUi(() => TrafficWindow.ShowSingle(AppState.Current)); return null; } },
         new DispMember { Name = "CloseCommunicationTraffic", DispId = 18, ReturnsValue = false, Get = _ => { OnUi(TrafficWindow.CloseSingle); return null; } },
         Prop("CertFilePath", 19, () => Cfg.ClientCertificatePath ?? "", v => Cfg.ClientCertificatePath = S(v).Length == 0 ? null : S(v)),
         Prop("KeyFilePath", 20, () => Cfg.ClientKeyPath ?? "", v => Cfg.ClientKeyPath = S(v).Length == 0 ? null : S(v)),

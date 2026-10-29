@@ -9,11 +9,13 @@ public enum FunctionCode : byte
     WriteSingleCoil = 5,
     WriteSingleRegister = 6,
     Diagnostics = 8,
+    GetCommEventCounter = 11,
     WriteMultipleCoils = 15,
     WriteMultipleRegisters = 16,
     ReportServerId = 17,
     MaskWriteRegister = 22,
     ReadWriteMultipleRegisters = 23,
+    EncapsulatedInterface = 43,
 }
 
 public static class FunctionCodes
@@ -40,6 +42,8 @@ public static class FunctionCodes
         FunctionCode.ReportServerId => "17 Report Server ID",
         FunctionCode.MaskWriteRegister => "22 Mask Write Register",
         FunctionCode.ReadWriteMultipleRegisters => "23 Read/Write Multiple Registers",
+        FunctionCode.GetCommEventCounter => "11 Get Comm Event Counter",
+        FunctionCode.EncapsulatedInterface => "43/14 Read Device Identification",
         _ => $"{(byte)f:D2}",
     };
 

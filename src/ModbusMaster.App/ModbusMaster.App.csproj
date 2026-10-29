@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ModbusMaster.Core\ModbusMaster.Core.csproj" />
+    <ProjectReference Include="..\ModbusMaster.Ui\ModbusMaster.Ui.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

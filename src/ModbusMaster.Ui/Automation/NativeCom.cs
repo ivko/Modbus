@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace ModbusMaster.App.Automation;
+namespace ModbusMaster.Ui.Automation;
 
 public enum DispKind { Method, Property, IndexedProperty }
 
@@ -85,7 +85,7 @@ public abstract class DispatchTarget
 public sealed class AutomationException(string message) : Exception(message);
 
 /// <summary>Hand-written COM objects: IUnknown + IDispatch, and IUnknown + IClassFactory.</summary>
-internal static unsafe class NativeCom
+public static unsafe class NativeCom
 {
     private const int S_OK = 0;
     private const int E_NOINTERFACE = unchecked((int)0x80004002);

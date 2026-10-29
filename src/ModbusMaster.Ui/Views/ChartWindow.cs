@@ -8,11 +8,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Microsoft.Win32;
-using ModbusMaster.App.Ui;
+using ModbusMaster.Ui;
 using ModbusMaster.Core;
 using ModbusMaster.Core.Polling;
 
-namespace ModbusMaster.App.Views;
+namespace ModbusMaster.Ui.Views;
 
 public sealed class ChartSeries
 {

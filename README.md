@@ -1,16 +1,17 @@
-# Modbus Master
+# Modbus Master and Modbus Slave
 
-A Modbus master for Windows with a graphical program, a command line tool and a COM automation
-interface. It covers Modbus TCP, UDP, RTU, ASCII, RTU/ASCII over TCP/UDP and Modbus/TCP Security (TLS).
+A Modbus master and a Modbus slave simulator for Windows, with a command line tool and COM automation.
+Both cover Modbus TCP, UDP, RTU, ASCII, RTU/ASCII over TCP/UDP and Modbus/TCP Security (TLS).
 
 | Part | File | Use |
 | --- | --- | --- |
-| Windows program | `ModbusMaster.exe` | Data windows, charts, logging, scans, Test Center |
+| Master program | `ModbusMaster.exe` | Data windows, charts, logging, scans, Test Center |
+| Slave simulator | `ModbusSlave.exe` | Simulated devices with value and error simulation (delay, missing answers, CRC errors, exceptions) |
 | Command line | `mbm.exe` | Batch files, PowerShell, Python `subprocess`, CI |
-| Automation | COM `ModbusMaster.Application` / `ModbusMaster.Document` | Excel VBA, VBScript, Python pywin32. Same members as the Modbus Poll automation interface |
+| Automation | COM `ModbusMaster.*` and `ModbusSlave.*` | Excel VBA, VBScript, Python pywin32. Same members as the Modbus Poll and Modbus Slave automation interfaces |
 | Library | `ModbusMaster.Core.dll` | C#, PowerShell 7.5+ |
 
-The user manual is `docs/manual/index.html` (also opened with F1 in the program).
+The manuals are `docs/manual/index.html` (master) and `docs/manual/slave.html` (slave), also opened with F1.
 
 ## Build
 
@@ -25,6 +26,7 @@ Publish everything into one folder (framework dependent, needs the .NET 10 Deskt
 
 ```
 dotnet publish src/ModbusMaster.App -c Release -o E:\tools\ModbusMaster
+dotnet publish src/ModbusMaster.Slave -c Release -o E:\tools\ModbusMaster
 dotnet publish src/ModbusMaster.Cli -c Release -o E:\tools\ModbusMaster
 ```
 
@@ -32,16 +34,19 @@ Register automation for the current user (no administrator rights needed):
 
 ```
 E:\tools\ModbusMaster\ModbusMaster.exe /regserver
+E:\tools\ModbusMaster\ModbusSlave.exe /regserver
 ```
 
-Add `/compat` to also register the names `Mbpoll.Application` and `Mbpoll.Document`, so scripts written
-for Modbus Poll run unchanged. Run it again after moving the program folder.
+Add `/compat` to also register `Mbpoll.*` (master) or `Mbslave.*` (slave), so scripts written for
+Modbus Poll or Modbus Slave run unchanged. Do not do that while those programs are installed and in use. Run it again after moving the program folder.
 
 ## Layout
 
 ```
-src/ModbusMaster.Core   protocol, transports (serial, TCP, UDP, TLS), framing, poll scheduler, scanners, simulator
-src/ModbusMaster.App    WPF program and the COM automation server
+src/ModbusMaster.Core   protocol, transports, framing, poll scheduler, scanners, slave engine and servers
+src/ModbusMaster.Ui     shared WPF parts: data grid, chart, traffic window, dialogs, COM server plumbing
+src/ModbusMaster.App    master program and its automation
+src/ModbusMaster.Slave  slave program and its automation
 src/ModbusMaster.Cli    mbm command line
 tests/                  unit and end-to-end tests (simulator over TCP, RTU, ASCII and TLS)
 docs/manual             user manual

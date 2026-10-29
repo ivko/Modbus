@@ -3,7 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace ModbusMaster.App.Ui;
+namespace ModbusMaster.Ui;
 
 public sealed record Choice<T>(T Value, string Text)
 {

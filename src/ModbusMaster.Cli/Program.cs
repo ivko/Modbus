@@ -52,6 +52,8 @@ public static class Program
                 "mask" => Mask(o),
                 "rw" => ReadWrite(o),
                 "id" => ReportId(o),
+                "devid" => DeviceId(o),
+                "events" => Events(o),
                 "diag" => Diagnostics(o),
                 "raw" => Raw(o),
                 "scan" => Scan(o),
@@ -187,6 +189,36 @@ public static class Program
             WriteJson(new JsonObject { ["unit"] = unit, ["hex"] = Hex.Format(data), ["text"] = text });
         else
             Console.WriteLine($"{Hex.Format(data)}\n{text}");
+        return ExitOk;
+    }
+
+    private static int DeviceId(Options o)
+    {
+        using var client = CreateClient(o);
+        var unit = o.Byte("unit", 1);
+        var objects = client.ReadDeviceIdentification(unit, o.Byte("code", 2), o.Byte("object", 0));
+        string[] names = ["VendorName", "ProductCode", "MajorMinorRevision", "VendorUrl", "ProductName", "ModelName", "UserApplicationName"];
+        string Name(byte id) => id < names.Length ? names[id] : $"Object{id}";
+        if (o.Flag("json"))
+        {
+            var obj = new JsonObject { ["unit"] = unit };
+            foreach (var (id, value) in objects) obj[Name(id)] = value;
+            WriteJson(obj);
+        }
+        else
+        {
+            foreach (var (id, value) in objects) Console.WriteLine($"{id} {Name(id)}: {value}");
+        }
+        return ExitOk;
+    }
+
+    private static int Events(Options o)
+    {
+        using var client = CreateClient(o);
+        var unit = o.Byte("unit", 1);
+        var (status, count) = client.GetCommEventCounter(unit);
+        if (o.Flag("json")) WriteJson(new JsonObject { ["unit"] = unit, ["status"] = status, ["eventCount"] = count });
+        else Console.WriteLine($"Status: 0x{status:X4}  Event count: {count}");
         return ExitOk;
     }
 

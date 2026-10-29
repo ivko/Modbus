@@ -1,4 +1,7 @@
-using ModbusMaster.App.Ui;
+using ModbusMaster.Ui.Automation;
+using ModbusMaster.Ui.Views;
+using ModbusMaster.Ui.Dialogs;
+using ModbusMaster.Ui;
 using ModbusMaster.Core.Polling;
 using ModbusMaster.Core.Protocol;
 

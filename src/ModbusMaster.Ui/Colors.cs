@@ -1,6 +1,6 @@
 using System.Windows.Media;
 
-namespace ModbusMaster.App.Ui;
+namespace ModbusMaster.Ui;
 
 public static class ColorUtil
 {

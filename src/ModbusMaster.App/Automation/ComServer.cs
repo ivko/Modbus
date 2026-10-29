@@ -1,8 +1,11 @@
+using ModbusMaster.Ui.Automation;
+using ModbusMaster.Ui.Views;
+using ModbusMaster.Ui.Dialogs;
+using ModbusMaster.Ui;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using Microsoft.Win32;
-using ModbusMaster.App.Ui;
 
 namespace ModbusMaster.App.Automation;
 

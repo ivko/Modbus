@@ -15,6 +15,8 @@ internal static class Help
           rw              Read/write multiple registers (function 23) --read-address --read-count --write-address --values
           id              Report server ID (function 17)
           diag            Diagnostics (function 08)                   --sub --data
+          devid           Read device identification (43/14)       --code 1|2|3|4 --object N
+          events          Get comm event counter (function 11)
           raw             Send any PDU and print the response PDU    --pdu "03 00 00 00 0A"
           scan            Slave scan: find responding IDs            --units 1-247
           scan-addresses  Address scan: find readable addresses      --addresses 0-9999

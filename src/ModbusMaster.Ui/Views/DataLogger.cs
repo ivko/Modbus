@@ -4,7 +4,7 @@ using System.Text;
 using ModbusMaster.Core;
 using ModbusMaster.Core.Polling;
 
-namespace ModbusMaster.App.Views;
+namespace ModbusMaster.Ui.Views;
 
 public sealed class LogOptions
 {

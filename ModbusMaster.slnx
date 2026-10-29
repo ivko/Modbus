@@ -3,6 +3,8 @@
     <Project Path="src/ModbusMaster.App/ModbusMaster.App.csproj" />
     <Project Path="src/ModbusMaster.Cli/ModbusMaster.Cli.csproj" />
     <Project Path="src/ModbusMaster.Core/ModbusMaster.Core.csproj" />
+    <Project Path="src/ModbusMaster.Slave/ModbusMaster.Slave.csproj" />
+    <Project Path="src/ModbusMaster.Ui/ModbusMaster.Ui.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/ModbusMaster.Tests/ModbusMaster.Tests.csproj" />

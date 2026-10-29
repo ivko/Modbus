@@ -1,4 +1,8 @@
 ﻿using System.IO;
+using ModbusMaster.Ui.Automation;
+using ModbusMaster.Ui.Views;
+using ModbusMaster.Ui.Dialogs;
+using ModbusMaster.Ui;
 using System.Windows;
 using System.Windows.Threading;
 using ModbusMaster.App.Automation;

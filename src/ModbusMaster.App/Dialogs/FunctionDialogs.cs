@@ -1,7 +1,10 @@
+using ModbusMaster.Ui.Automation;
+using ModbusMaster.Ui.Views;
+using ModbusMaster.Ui.Dialogs;
+using ModbusMaster.Ui;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using ModbusMaster.App.Ui;
 using ModbusMaster.Core;
 using ModbusMaster.Core.Data;
 using ModbusMaster.Core.Protocol;

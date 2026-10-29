@@ -90,6 +90,19 @@ public sealed class RtuFramer : IFramer
         return frame[^2] == (byte)crc && frame[^1] == (byte)(crc >> 8);
     }
 
+    /// <summary>Function 43/14 has no byte count: MEI type, code, conformity, more, next id, count, then (id, length, value) objects.</summary>
+    internal static void ReadDeviceIdentificationBody(IByteChannel channel, DateTime deadlineUtc, List<byte> frame)
+    {
+        var head = channel.ReadExact(6, deadlineUtc);
+        frame.AddRange(head);
+        for (var i = 0; i < head[5]; i++)
+        {
+            var obj = channel.ReadExact(2, deadlineUtc);
+            frame.AddRange(obj);
+            if (obj[1] > 0) frame.AddRange(channel.ReadExact(obj[1], deadlineUtc));
+        }
+    }
+
     public void WriteRequest(IByteChannel channel, ushort transactionId, byte unit, byte[] pdu, Action<TrafficEntry> log)
     {
         channel.DiscardInput();
@@ -119,8 +132,12 @@ public sealed class RtuFramer : IFramer
                         frame.Add(count[0]);
                         rest = count[0] + 2;
                         break;
-                    case 5: case 6: case 8: case 15: case 16:
+                    case 5: case 6: case 8: case 11: case 15: case 16:
                         rest = 6;
+                        break;
+                    case 43:
+                        ReadDeviceIdentificationBody(channel, deadlineUtc, frame);
+                        rest = 2;
                         break;
                     case 22:
                         rest = 8;

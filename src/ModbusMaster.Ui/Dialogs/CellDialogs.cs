@@ -1,11 +1,11 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using ModbusMaster.App.Ui;
+using ModbusMaster.Ui;
 using ModbusMaster.Core.Data;
 using ModbusMaster.Core.Polling;
 
-namespace ModbusMaster.App.Dialogs;
+namespace ModbusMaster.Ui.Dialogs;
 
 /// <summary>Display options for the selected value cells.</summary>
 public static class CellDialogs

@@ -48,10 +48,13 @@ public sealed class TlsChannel : IByteChannel
         }
     }
 
-    /// <summary>Loads a PFX/P12 file, or a PEM/CRT certificate with its PEM private key (ClientKeyPath).</summary>
-    private static X509Certificate2 LoadClientCertificate(ConnectionSettings s)
+    private static X509Certificate2 LoadClientCertificate(ConnectionSettings s) =>
+        LoadCertificate(s.ClientCertificatePath!, s.ClientKeyPath, s.ClientCertificatePassword);
+
+    /// <summary>Loads a PFX/P12 file, or a PEM/CRT certificate with its PEM private key.</summary>
+    public static X509Certificate2 LoadCertificate(string path, string? keyPath, string? password)
     {
-        var path = s.ClientCertificatePath!;
+        var s = new ConnectionSettings { ClientCertificatePath = path, ClientKeyPath = keyPath, ClientCertificatePassword = password };
         var ext = Path.GetExtension(path).ToLowerInvariant();
         if (ext is ".pfx" or ".p12")
             return X509CertificateLoader.LoadPkcs12FromFile(path, s.ClientCertificatePassword, X509KeyStorageFlags.DefaultKeySet);

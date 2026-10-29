@@ -234,6 +234,45 @@ public sealed class ModbusClient : IDisposable
         return BinaryPrimitives.ReadUInt16BigEndian(response.AsSpan(3));
     }
 
+    /// <summary>Function 11. Returns (status word, event count). Status 0xFFFF means a previous command is still running.</summary>
+    public (ushort Status, ushort EventCount) GetCommEventCounter(byte unit)
+    {
+        var response = Execute(unit, [(byte)FunctionCode.GetCommEventCounter]);
+        if (response.Length != 5) throw new ModbusFrameException("Get Comm Event Counter response must have 4 data bytes.", ModbusResult.ByteCountError);
+        return (BinaryPrimitives.ReadUInt16BigEndian(response.AsSpan(1)), BinaryPrimitives.ReadUInt16BigEndian(response.AsSpan(3)));
+    }
+
+    /// <summary>
+    /// Function 43 / MEI 14 Read Device Identification. <paramref name="code"/>: 1 basic, 2 regular, 3 extended,
+    /// 4 one specific object. Follows "more follows" until all objects of the category are read.
+    /// </summary>
+    public IReadOnlyList<(byte Id, string Value)> ReadDeviceIdentification(byte unit, byte code = 2, byte objectId = 0)
+    {
+        var result = new List<(byte, string)>();
+        var next = objectId;
+        for (var guard = 0; guard < 64; guard++)
+        {
+            var response = Execute(unit, [(byte)FunctionCode.EncapsulatedInterface, 0x0E, code, next]);
+            if (response.Length < 7 || response[1] != 0x0E)
+                throw new ModbusFrameException("Invalid Read Device Identification response.", ModbusResult.ByteCountError);
+            var more = response[4];
+            next = response[5];
+            var count = response[6];
+            var pos = 7;
+            for (var i = 0; i < count; i++)
+            {
+                if (pos + 2 > response.Length) throw new ModbusFrameException("Truncated device identification object.", ModbusResult.InsufficientBytes);
+                var id = response[pos];
+                var len = response[pos + 1];
+                if (pos + 2 + len > response.Length) throw new ModbusFrameException("Truncated device identification object.", ModbusResult.InsufficientBytes);
+                result.Add((id, System.Text.Encoding.ASCII.GetString(response, pos + 2, len)));
+                pos += 2 + len;
+            }
+            if (more != 0xFF || code == 4) break;
+        }
+        return result;
+    }
+
     private void WriteEcho(byte unit, byte[] request, int echoLength)
     {
         var response = Execute(unit, request);

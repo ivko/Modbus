@@ -6,7 +6,7 @@ using ModbusMaster.Core.Polling;
 namespace ModbusMaster.App;
 
 /// <summary>Application-wide state shared by the windows and the automation interface.</summary>
-public sealed class AppState : IDisposable
+public sealed class AppState : IDisposable, ModbusMaster.Ui.ITrafficSource
 {
     public const int TrafficCapacity = 20000;
 

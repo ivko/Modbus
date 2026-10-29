@@ -2,12 +2,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 
-namespace ModbusMaster.App.Ui;
+namespace ModbusMaster.Ui;
 
 /// <summary>Opens the user manual (manual\index.html next to the program) at a topic anchor.</summary>
 public static class Help
 {
-    public static string ManualPath => Path.Combine(AppContext.BaseDirectory, "manual", "index.html");
+    /// <summary>The manual page of this program inside the "manual" folder.</summary>
+    public static string ManualFile { get; set; } = "index.html";
+
+    public static string ManualPath => Path.Combine(AppContext.BaseDirectory, "manual", ManualFile);
 
     public static void Open(string topic = "")
     {

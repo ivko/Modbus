@@ -58,8 +58,11 @@ public sealed class CellSettings
     public ConditionalColors? Colors { get; set; }
     public List<ValueName> ValueNames { get; set; } = [];
 
+    /// <summary>Slave windows only: the value changes by itself.</summary>
+    public CellSimulation? Simulation { get; set; }
+
     [JsonIgnore]
-    public bool IsDefault => Name.Length == 0 && Format == DisplayFormat.Signed && Scaling is null && Colors is null && ValueNames.Count == 0;
+    public bool IsDefault => Name.Length == 0 && Format == DisplayFormat.Signed && Scaling is null && Colors is null && ValueNames.Count == 0 && Simulation is null;
 
     public CellSettings Clone() => new()
     {
@@ -68,6 +71,7 @@ public sealed class CellSettings
         Scaling = Scaling?.Clone(),
         Colors = Colors?.Clone(),
         ValueNames = ValueNames.Select(v => new ValueName { Value = v.Value, Name = v.Name }).ToList(),
+        Simulation = Simulation?.Clone(),
     };
 }
 
@@ -202,6 +206,30 @@ public sealed class PollDocument
     }
 
     internal void NotifyChanged() => Updated?.Invoke(this);
+
+    /// <summary>Slave windows: shows <paramref name="values"/> without touching the request counters.</summary>
+    internal void SetValues(ushort[] values)
+    {
+        lock (_sync)
+        {
+            _values = values;
+            LastResult = ModbusResult.Success;
+            LastError = "";
+            LastUpdate = DateTime.Now;
+        }
+        Updated?.Invoke(this);
+    }
+
+    /// <summary>Slave windows: counts requests that reached this window.</summary>
+    internal void CountRequest(bool error)
+    {
+        lock (_sync)
+        {
+            TxCount++;
+            if (!error) RxCount++;
+            else ErrorCount++;
+        }
+    }
 
     /// <summary>Formats cell <paramref name="index"/> with its name, format, scaling and value names.</summary>
     public string FormatCell(int index, ushort[]? values = null)

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modbus Slave User Manual</title>
+<style>
+  :root { --fg:#1d2430; --muted:#5b6575; --line:#dde2e8; --code:#f3f5f8; --warn:#fff6e0; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.55 "Segoe UI", system-ui, sans-serif; color:var(--fg); background:#fff; }
+  nav { position:fixed; top:0; left:0; bottom:0; width:260px; overflow:auto; padding:18px 14px; border-right:1px solid var(--line); background:#fafbfc; font-size:14px; }
+  nav h2 { font-size:15px; margin:0 0 10px; }
+  nav a { display:block; color:var(--fg); text-decoration:none; padding:2px 6px; border-radius:4px; }
+  nav a:hover { background:#e9eef5; }
+  nav a.sub { padding-left:20px; color:var(--muted); }
+  main { margin-left:260px; padding:24px 40px 80px; max-width:1000px; }
+  h1 { font-size:28px; margin:0 0 4px; }
+  h2 { font-size:22px; margin:42px 0 10px; padding-top:10px; border-top:1px solid var(--line); }
+  h3 { font-size:17px; margin:24px 0 6px; }
+  code, pre, kbd { font-family: Consolas, "Cascadia Mono", monospace; font-size:13px; }
+  code { background:var(--code); padding:1px 4px; border-radius:3px; }
+  pre { background:var(--code); padding:10px 12px; border-radius:6px; overflow:auto; line-height:1.4; }
+  kbd { border:1px solid #c5ccd6; border-bottom-width:2px; border-radius:3px; padding:0 4px; background:#fff; }
+  table { border-collapse:collapse; margin:8px 0 14px; width:100%; }
+  th, td { border:1px solid var(--line); padding:4px 8px; text-align:left; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .note { background:var(--warn); border-left:4px solid #e0a800; padding:8px 12px; border-radius:4px; margin:10px 0; }
+  .muted { color:var(--muted); }
+  @media (max-width: 800px) { nav { position:static; width:auto; border-right:0; border-bottom:1px solid var(--line); } main { margin-left:0; padding:16px; } }
+</style>
+</head>
+<body>
+<nav>
+  <h2>Modbus Slave</h2>
+  <a href="#intro">1. Introduction</a>
+  <a href="#quick-start">2. Quick start</a>
+  <a href="#overview">3. Windows and cells</a>
+  <a href="#connection">4. Connection setup</a>
+  <a href="#definition">5. Slave definition</a>
+  <a class="sub" href="#addresses">Addresses</a>
+  <a class="sub" href="#strict">Strict addressing</a>
+  <a href="#values">6. Changing values</a>
+  <a href="#value-simulation">7. Value simulation</a>
+  <a href="#error-simulation">8. Error simulation</a>
+  <a href="#device-id">9. Device identification</a>
+  <a href="#functions">10. Supported functions</a>
+  <a href="#formats">11. Display formats and cells</a>
+  <a href="#chart">12. Real-time charting</a>
+  <a href="#logging">13. Logging</a>
+  <a href="#workspace">14. Workspaces and CSV</a>
+  <a href="#traffic">15. Communication traffic</a>
+  <a href="#automation">16. Automation (COM)</a>
+  <a href="#testing">17. Testing a master</a>
+  <a href="#shortcuts">18. Keyboard shortcuts</a>
+</nav>
+<main>
+
+<h1>Modbus Slave User Manual</h1>
+<p class="muted">Version 1.0 · Modbus slave simulator with value and error simulation. Companion of Modbus Master.</p>
+
+<h2 id="intro">1. Introduction</h2>
+<p>Modbus Slave plays the role of one or more Modbus devices (slaves, servers). A master such as a SCADA system, an HMI, a PLC or Modbus Master sends requests; Modbus Slave answers them from the values shown in its windows. Use it to develop and test master software without the real devices, or to reproduce faults that are hard to provoke on real hardware.</p>
+<ul>
+  <li>Serial RTU and ASCII, Modbus TCP, Modbus UDP, RTU/ASCII over TCP and UDP, and Modbus/TCP Security (TLS).</li>
+  <li>Any number of slave IDs, each with its own coils, discrete inputs, holding registers and input registers.</li>
+  <li>Functions 01 to 06, 08, 11, 15, 16, 17, 22, 23 and 43/14.</li>
+  <li>Value simulation per cell: increment, decrement, random, sine, ramp and toggle.</li>
+  <li><b>Error simulation</b> per slave: response delay, missing answers, wrong CRC/LRC, truncated answers, answers from another slave ID and forced exception codes.</li>
+  <li>The same display formats, scaling, conditional colors, value names, charts and traffic window as Modbus Master.</li>
+  <li>Automation with the same member names as the Modbus Slave (Witte Software) automation interface.</li>
+</ul>
+
+<h2 id="quick-start">2. Quick start</h2>
+<ol>
+  <li>Start <b>ModbusSlave.exe</b>. A window for slave ID 1, holding registers 0 to 9 opens.</li>
+  <li>Press <kbd>F3</kbd>, choose <b>Modbus TCP/IP</b>, port <b>1502</b> (ports below 1024 may be blocked or used by other programs), and press OK. The status bar shows <i>Listening</i>.</li>
+  <li>Double click a value and enter a number.</li>
+  <li>Read it from a master, for example with Modbus Master or from a command prompt:
+<pre>mbm read --tcp 127.0.0.1:1502 --count 10</pre></li>
+</ol>
+<p class="note">Windows Firewall asks whether Modbus Slave may accept connections the first time it listens on a network interface. Allow it for private networks if masters on other computers must reach it.</p>
+
+<h2 id="overview">3. Windows and cells</h2>
+<p>Each tab is a slave window. It shows one block of one table of one slave ID. Several windows may show different blocks of the same slave, or different slaves.</p>
+<pre>ID = 1: F = 03: Requests = 214: Errors = 3: Simulated faults = 3</pre>
+<p>The status line counts the requests that reached this window and the ones that ended in an exception or a simulated fault. A second line appears in red while the slave is not listening, in listen-only mode, or while error simulation is on.</p>
+<p>The Name column is free text. Values change when the master writes, when value simulation runs, or when you edit them.</p>
+
+<h2 id="connection">4. Connection setup</h2>
+<p>Connection &gt; Connect (<kbd>F3</kbd>) sets up and starts the slave. Quick Connect (<kbd>F5</kbd>) starts it again with the last settings, Disconnect (<kbd>F4</kbd>) stops it.</p>
+<table>
+  <tr><th>Setting</th><th>Meaning</th></tr>
+  <tr><td>Connection</td><td>Serial port, Modbus TCP/IP, Modbus UDP/IP, RTU/ASCII over TCP/IP or UDP/IP, Modbus/TCP Security</td></tr>
+  <tr><td>Serial settings</td><td>Port, baud rate, data bits, parity, stop bits, RTU or ASCII mode. They must match the master exactly.</td></tr>
+  <tr><td>Any address</td><td>Listen on all network interfaces. Turn it off and enter an IP address to listen on one interface only (e.g. 127.0.0.1 for local tests).</td></tr>
+  <tr><td>Port</td><td>502 is the Modbus standard, 802 for Modbus/TCP Security.</td></tr>
+  <tr><td>Ignore unit ID</td><td>Answer requests for slave IDs without a window with the first slave. Many TCP masters send unit ID 0 or 255.</td></tr>
+  <tr><td>Server certificate</td><td>Modbus/TCP Security: a PFX file, or a PEM certificate with its key file.</td></tr>
+  <tr><td>Require a client certificate</td><td>Masters must present a certificate. With a trusted client CA, only certificates signed by that CA are accepted; without it, any certificate is accepted.</td></tr>
+</table>
+<p>On a serial line only one program can own the port. Use a pair of virtual COM ports (com0com or similar) to connect a master on the same computer.</p>
+
+<h2 id="definition">5. Slave definition</h2>
+<p>Setup &gt; Slave Definition (<kbd>F8</kbd>) sets what the current window represents.</p>
+<table>
+  <tr><th>Field</th><th>Meaning</th></tr>
+  <tr><td>Slave ID</td><td>1 to 247 on a serial line (up to 255 allowed). TCP devices commonly use 1, 0 or 255.</td></tr>
+  <tr><td>Function</td><td>The table: 01 coils, 02 discrete inputs, 03 holding registers, 04 input registers. Coil windows also accept writes 05 and 15; holding register windows accept 06, 16, 22 and 23.</td></tr>
+  <tr><td>Address, Quantity</td><td>First address and number of values, 1 to 10000.</td></tr>
+  <tr><td>Disabled</td><td>The slave does not answer while all its windows are disabled. Use it to simulate a device that was switched off.</td></tr>
+</table>
+<h3 id="addresses">Addresses</h3>
+<p>Addresses count from 0, as in the protocol. With PLC addresses on, you can type and see 40001-style addresses: 40001 is holding register 0, 30001 input register 0, 10001 discrete input 0, 1 coil 0.</p>
+<h3 id="strict">Strict addressing</h3>
+<p>With Setup &gt; Strict Addressing on (the default), only addresses shown in a window exist. A request that touches any other address gets exception 02 Illegal Data Address, as a real device would. Adjacent windows count as one block. Turn it off to accept every address 0 to 65535 of every table of a defined slave.</p>
+
+<h2 id="values">6. Changing values</h2>
+<ul>
+  <li>Double click a register value, or press <kbd>Enter</kbd>, and type the new value in the cell's format (e.g. <code>12.5</code> in a float cell).</li>
+  <li>Double click a coil or input to toggle it. With several selected, all get the opposite of the first.</li>
+  <li>File &gt; Import Values from CSV loads <code>address;value</code> rows (raw register values) into the current window. Files saved with Export to CSV can be imported again.</li>
+</ul>
+
+<h2 id="value-simulation">7. Value simulation</h2>
+<p>Select cells and choose Simulation &gt; Value Simulation (<kbd>F9</kbd>). The slave then changes the values by itself:</p>
+<table>
+  <tr><th>Mode</th><th>Behaviour</th></tr>
+  <tr><td>Increment / Decrement</td><td>Adds or subtracts Step every interval and wraps around between Min and Max.</td></tr>
+  <tr><td>Random</td><td>A random value between Min and Max every interval.</td></tr>
+  <tr><td>Sine</td><td>A sine wave between Min and Max with the given period.</td></tr>
+  <tr><td>Ramp</td><td>Rises from Min to Max over the period, then starts again.</td></tr>
+  <tr><td>Toggle</td><td>Switches between Min and Max (0 and 1 for coils).</td></tr>
+</table>
+<p>Simulation uses the cell's display format: set a cell to 32-bit Float first, and Sine produces a float that covers two registers. Simulation &gt; Auto Increment and Auto Decrement add 1 every second over the whole range of the format. Simulation settings are saved in the workspace.</p>
+
+<h2 id="error-simulation">8. Error simulation</h2>
+<p>Setup &gt; Error Simulation (<kbd>Ctrl</kbd>+<kbd>E</kbd>) makes the slave of the current window misbehave on purpose. Use it to check that a master reports errors, retries, times out and recovers correctly. The settings apply to all windows of that slave ID.</p>
+<table>
+  <tr><th>Setting</th><th>What the master sees</th></tr>
+  <tr><td>Response delay, random extra delay</td><td>Slow answers. A delay longer than the master's response timeout gives a timeout; a delay just below it tests the margin.</td></tr>
+  <tr><td>No response [%], every Nth request</td><td>Timeouts. "Every 3rd" gives a regular pattern that is easy to see in a log.</td></tr>
+  <tr><td>Wrong CRC/LRC [%]</td><td>A CRC error (RTU) or LRC error (ASCII). On TCP and UDP, which carry no checksum, the MBAP protocol identifier is made invalid so the master must reject the frame.</td></tr>
+  <tr><td>Truncated answer [%]</td><td>The end of the frame is missing: "insufficient bytes" or a timeout.</td></tr>
+  <tr><td>Answer with another slave ID [%]</td><td>A response error: the answer comes from the wrong device.</td></tr>
+  <tr><td>Exception, only for function, exception [%]</td><td>An exception response instead of the data, e.g. 04 Server Device Failure or 06 Server Device Busy. The request is not executed.</td></tr>
+</table>
+<p>Faults are chosen per request in this order: no response, exception, then one of checksum / truncate / wrong ID; the delay applies to every answer. Simulated faults appear in the status line and in the traffic window with a note.</p>
+<p>Diagnostics also behave like a real serial device: sub-function 04 puts the slave in listen-only mode (no answers at all) until a master sends sub-function 01.</p>
+
+<h2 id="device-id">9. Device identification</h2>
+<p>Setup &gt; Device Identification sets what the slave reports:</p>
+<ul>
+  <li>Function 43/14 Read Device Identification: vendor name, product code and revision (basic), vendor URL, product name, model name and user application name (regular). Stream access (codes 1 and 2) and individual access (code 4) are supported.</li>
+  <li>Function 17 Report Server ID: the server ID text and the run indicator.</li>
+</ul>
+
+<h2 id="functions">10. Supported functions</h2>
+<table>
+  <tr><th>Code</th><th>Function</th><th>Notes</th></tr>
+  <tr><td>01, 02, 03, 04</td><td>Read coils, discrete inputs, holding and input registers</td><td>Up to 2000 bits or 125 registers per request</td></tr>
+  <tr><td>05, 15</td><td>Write single / multiple coils</td><td>05 accepts only FF00 and 0000</td></tr>
+  <tr><td>06, 16</td><td>Write single / multiple registers</td><td></td></tr>
+  <tr><td>08</td><td>Diagnostics</td><td>00 echo, 01 restart, 02 register, 04 listen only, 10 clear counters, 11-15 message, error, exception, server message and no-response counters</td></tr>
+  <tr><td>11</td><td>Get comm event counter</td><td>Counts successful requests</td></tr>
+  <tr><td>17</td><td>Report server ID</td><td></td></tr>
+  <tr><td>22</td><td>Mask write register</td><td></td></tr>
+  <tr><td>23</td><td>Read/write multiple registers</td><td>Write first, then read</td></tr>
+  <tr><td>43/14</td><td>Read device identification</td><td>Objects 0 to 6</td></tr>
+</table>
+<p>Other function codes get exception 01 Illegal Function. Serial broadcasts (slave ID 0) are executed by every slave and never answered.</p>
+
+<h2 id="formats">11. Display formats and cells</h2>
+<span id="scaling"></span><span id="colors"></span><span id="value-names"></span>
+<p>Display formats (signed, unsigned, hex, binary, 32/64-bit integers, float and double in four byte orders), scaling, conditional colors and value names work exactly as in Modbus Master. See the Modbus Master manual:
+<a href="index.html#formats">display formats and format numbers</a>,
+<a href="index.html#scaling">scaling</a>,
+<a href="index.html#colors">conditional colors</a>,
+<a href="index.html#value-names">value names</a>.</p>
+<p>The display format also decides how you enter values and how value simulation encodes them.</p>
+
+<h2 id="chart">12. Real-time charting</h2>
+<p>Select cells and press <kbd>Ctrl</kbd>+<kbd>L</kbd> (Display &gt; Link to Chart). Zoom with the mouse wheel, pan by dragging, double click to follow live data, and export the series as CSV or the chart as PNG. Details: <a href="index.html#chart">charting in the Modbus Master manual</a>.</p>
+
+<h2 id="logging">13. Logging</h2>
+<p>Setup &gt; Log writes the window's values to a CSV file at most once per interval, optionally only when a value changed. Logging Off stops it.</p>
+
+<h2 id="workspace">14. Workspaces and CSV</h2>
+<p>File &gt; Save Workspace (<kbd>Ctrl</kbd>+<kbd>S</kbd>) writes a <code>*.mms</code> file with the connection, all windows with their cell settings and value simulation, the error simulation and device identification of each slave, <b>and the current values</b>. Opening it restores the complete simulated plant. Certificate passwords are never saved. File &gt; Export to CSV saves address, name, formatted value and raw value of the current window.</p>
+
+<h2 id="traffic">15. Communication traffic</h2>
+<p>Display &gt; Communication (<kbd>F7</kbd>) shows every request received (Rx) and answer sent (Tx). Requests that were not answered, damaged requests and simulated faults are marked with a note.</p>
+
+<h2 id="automation">16. Automation (COM)</h2>
+<p>Register once with Tools &gt; Register Automation, or <code>ModbusSlave.exe /regserver</code>. The object names are <code>ModbusSlave.Application</code> and <code>ModbusSlave.Document</code>. With <code>/regserver /compat</code> the names <code>Mbslave.Application</code> and <code>Mbslave.Document</code> are registered too, so scripts written for Modbus Slave by Witte Software run unchanged. Do not do that while that program is installed and in use.</p>
+<h3>Application</h3>
+<table>
+  <tr><th>Member</th><th>Values</th></tr>
+  <tr><td>Connection</td><td>0 Serial, 1 Modbus TCP/IP, 2 Modbus UDP/IP, 3 RTU over TCP/IP, 4 RTU over UDP/IP, 5 Modbus/TCP Security</td></tr>
+  <tr><td>BaudRate, DataBits, Parity, StopBits, SerialPort, Mode</td><td>Serial settings. Parity 0 None, 1 Odd, 2 Even. Mode 0 RTU, 1 ASCII.</td></tr>
+  <tr><td>ServerPort, IPVersion, IPAddress</td><td>TCP/UDP settings</td></tr>
+  <tr><td>AnyAddress, IgnoreUnitID</td><td>0 or 1</td></tr>
+  <tr><td>OpenConnection(), CloseConnection()</td><td>Start and stop the slave. 0 = success, 255 = already running.</td></tr>
+  <tr><td>ShowCommunicationTraffic(), CloseCommunicationTraffic()</td><td>Traffic window</td></tr>
+  <tr><td>StrictAddressing, Visible, CertFilePath, KeyFilePath</td><td>Extensions</td></tr>
+</table>
+<h3>Document</h3>
+<table>
+  <tr><th>Member</th><th>Description</th></tr>
+  <tr><td>SetupCoils, SetupDiscreteInputs, SetupHoldingRegisters, SetupInputRegisters (SlaveID, Address, Quantity)</td><td>Defines the window. Quantity 1 to 10000. Returns 1 on success, 0 for invalid arguments.</td></tr>
+  <tr><td>Coils(i), SRegisters(i), URegisters(i), Ints_32(i), UInts_32(i), Ints_64(i), UInts_64(i), Floats(i), Doubles(i)</td><td>Read or change the slave memory. The index counts from the window's first address. 32-bit values use 2 registers, 64-bit values 4.</td></tr>
+  <tr><td>ByteOrder</td><td>0 big-endian, 1 little-endian byte swap, 2 big-endian byte swap, 3 little-endian</td></tr>
+  <tr><td>AutoIncrement(i), AutoDecrement(i)</td><td>True starts counting by 1 every second, False stops it</td></tr>
+  <tr><td>GetName, SetName, GetFormat, SetFormat, FormatAll</td><td>Cell names and formats (format numbers as in Modbus Master)</td></tr>
+  <tr><td>ShowWindow(), ReadWriteDisabled, EnableRefresh, Rows, ResizeWindow, ResizeAllColumns</td><td>Window control</td></tr>
+  <tr><td>ErrorSimulation, ResponseDelay, NoResponsePercent, ChecksumErrorPercent, ExceptionCode</td><td>Extensions: error simulation of this window's slave ID</td></tr>
+  <tr><td>GetRequestCount(), Title, Close()</td><td>Extensions</td></tr>
+</table>
+<h3>Example (VBScript)</h3>
+<pre>Set app = CreateObject("ModbusSlave.Application")
+app.Connection = 1 : app.ServerPort = 1502 : app.AnyAddress = 1
+Set doc = CreateObject("ModbusSlave.Document")
+doc.SetupHoldingRegisters 1, 0, 20
+doc.ByteOrder = 0
+doc.Floats(0) = 21.5           ' registers 0-1
+doc.SRegisters(2) = -7
+doc.AutoIncrement(3) = True
+app.OpenConnection
+doc.ShowWindow</pre>
+<p>In Python (pywin32) call methods with parentheses and set indexed values as <code>doc.SRegisters(2, -7)</code>.</p>
+
+<h2 id="testing">17. Testing a master</h2>
+<p>A typical test of master software against Modbus Slave:</p>
+<ol>
+  <li>Build the device in windows: one per table and address block, with names and formats. Save it as a workspace.</li>
+  <li>Let value simulation move the measurements (sine for temperatures, random for noisy inputs, increment for counters).</li>
+  <li>Check normal operation, then turn on error simulation step by step: a delay near the master's timeout, 10 % missing answers, 5 % CRC errors, then exception 06 (busy) for write functions only.</li>
+  <li>Watch the traffic window on both sides. Modbus Master shows the same frames from the master's point of view.</li>
+</ol>
+<p>For automated tests, drive both programs from a script: Modbus Slave through automation, the master under test as usual, or Modbus Master's <code>mbm</code> command line, whose exit codes tell exactly what happened (0 ok, 1 exception, 2 communication error).</p>
+
+<h2 id="shortcuts">18. Keyboard shortcuts</h2>
+<table>
+  <tr><th>Key</th><th>Action</th><th>Key</th><th>Action</th></tr>
+  <tr><td><kbd>F1</kbd></td><td>Help</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd></td><td>New window</td></tr>
+  <tr><td><kbd>F3</kbd></td><td>Connect</td><td><kbd>Ctrl</kbd>+<kbd>O</kbd> / <kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Open / save workspace</td></tr>
+  <tr><td><kbd>F4</kbd></td><td>Disconnect</td><td><kbd>Ctrl</kbd>+<kbd>E</kbd></td><td>Error simulation</td></tr>
+  <tr><td><kbd>F5</kbd></td><td>Quick connect</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd></td><td>Link to chart</td></tr>
+  <tr><td><kbd>F7</kbd></td><td>Communication traffic</td><td><kbd>Ctrl</kbd>+<kbd>F4</kbd></td><td>Close window</td></tr>
+  <tr><td><kbd>F8</kbd></td><td>Slave definition</td><td><kbd>Alt</kbd>+<kbd>S/U/H/B</kbd></td><td>Signed / Unsigned / Hex / Binary</td></tr>
+  <tr><td><kbd>F9</kbd></td><td>Value simulation</td><td><kbd>Enter</kbd>, double click</td><td>Change the selected value</td></tr>
+</table>
+
+</main>
+</body>
+</html>

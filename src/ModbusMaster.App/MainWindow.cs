@@ -1,3 +1,7 @@
+using ModbusMaster.Ui.Automation;
+using ModbusMaster.Ui.Views;
+using ModbusMaster.Ui.Dialogs;
+using ModbusMaster.Ui;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
@@ -9,7 +13,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Win32;
 using ModbusMaster.App.Dialogs;
-using ModbusMaster.App.Ui;
 using ModbusMaster.App.Views;
 using ModbusMaster.Core;
 using ModbusMaster.Core.Data;
@@ -96,7 +99,7 @@ public sealed class MainWindow : Window
         display.Items.Add(_plcItem);
         _plcItem.Click += (_, _) => WithCurrent(v => { v.Document.Definition.PlcAddresses = _plcItem.IsChecked; v.Rebuild(); });
         display.Items.Add(new Separator());
-        Item(display, "C_ommunication...", TrafficWindow.ShowSingle, Key.F7);
+        Item(display, "C_ommunication...", () => TrafficWindow.ShowSingle(AppState.Current), Key.F7);
         Item(display, "_Real Time Charting...", () => WithCurrent(v => OpenChart(v)));
         Item(display, "_Link to Chart", () => WithCurrent(v => OpenChart(v).Link(v.SelectedIndices)), Key.L, ModifierKeys.Control);
 
@@ -176,7 +179,7 @@ public sealed class MainWindow : Window
 
     public PollView AddDocument(PollDocument doc, bool select = true)
     {
-        var view = new PollView(doc);
+        var view = new PollView(doc) { IsOnline = () => AppState.Current.IsConnected };
         view.EditRequested += EditValue;
         var header = new StackPanel { Orientation = Orientation.Horizontal };
         var title = new TextBlock { Text = doc.Title, VerticalAlignment = VerticalAlignment.Center };
@@ -591,11 +594,4 @@ public sealed class MainWindow : Window
         parent.Items.Add(item);
         return item;
     }
-}
-
-public sealed class RelayCommand(Action action) : ICommand
-{
-    public event EventHandler? CanExecuteChanged { add { } remove { } }
-    public bool CanExecute(object? parameter) => true;
-    public void Execute(object? parameter) => action();
 }

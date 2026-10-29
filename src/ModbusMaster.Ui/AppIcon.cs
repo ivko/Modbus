@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace ModbusMaster.App.Ui;
+namespace ModbusMaster.Ui;
 
 /// <summary>Draws the window icon: a blue tile with "MM".</summary>
 public static class AppIcon

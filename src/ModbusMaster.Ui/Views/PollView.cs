@@ -7,12 +7,12 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using ModbusMaster.App.Ui;
+using ModbusMaster.Ui;
 using ModbusMaster.Core;
 using ModbusMaster.Core.Polling;
 using ModbusMaster.Core.Protocol;
 
-namespace ModbusMaster.App.Views;
+namespace ModbusMaster.Ui.Views;
 
 public sealed class CellRow : INotifyPropertyChanged
 {
@@ -153,6 +153,16 @@ public sealed class PollView : DockPanel
     public PollDocument Document { get; }
     public DataGrid Grid { get; }
 
+    /// <summary>False shows <see cref="OfflineText"/> instead of the last result.</summary>
+    public Func<bool> IsOnline { get; set; } = () => true;
+    public string OfflineText { get; set; } = "No connection";
+
+    /// <summary>Replaces the status line (Tx / Err / ID / F / SR).</summary>
+    public Func<PollDocument, string>? StatusText { get; set; }
+
+    /// <summary>Replaces the red error line; return "" for none.</summary>
+    public Func<PollDocument, string>? ErrorText { get; set; }
+
     /// <summary>Logging attached to this window, if any.</summary>
     public DataLogger? Logger { get; set; }
 
@@ -205,10 +215,10 @@ public sealed class PollView : DockPanel
         _dirty = false;
         var d = Document;
         var def = d.Definition;
-        var client = AppState.Current.Client;
-        _status.Text = $"Tx = {d.TxCount}: Err = {d.ErrorCount}: {def.Describe()}{(def.Disabled ? "  [disabled]" : "")}";
+        _status.Text = StatusText?.Invoke(d) ?? $"Tx = {d.TxCount}: Err = {d.ErrorCount}: {def.Describe()}{(def.Disabled ? "  [disabled]" : "")}";
 
-        _error.Text = client is null ? "No connection"
+        _error.Text = ErrorText is not null ? ErrorText(d)
+            : !IsOnline() ? OfflineText
             : d.LastResult switch
             {
                 ModbusResult.Success => "",

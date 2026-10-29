@@ -1,8 +1,11 @@
+using ModbusMaster.Ui.Automation;
+using ModbusMaster.Ui.Views;
+using ModbusMaster.Ui.Dialogs;
+using ModbusMaster.Ui;
 using System.IO.Ports;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
-using ModbusMaster.App.Ui;
 using ModbusMaster.Core;
 using ModbusMaster.Core.Channels;
 

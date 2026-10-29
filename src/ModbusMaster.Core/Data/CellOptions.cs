@@ -82,3 +82,34 @@ public sealed class ValueName
     public long Value { get; set; }
     public string Name { get; set; } = "";
 }
+
+/// <summary>How a slave changes a value by itself.</summary>
+public enum SimulationMode
+{
+    None,
+    /// <summary>Adds Step every interval; wraps from Max to Min.</summary>
+    Increment,
+    /// <summary>Subtracts Step every interval; wraps from Min to Max.</summary>
+    Decrement,
+    /// <summary>A random value between Min and Max every interval.</summary>
+    Random,
+    /// <summary>Sine wave between Min and Max with the given period.</summary>
+    Sine,
+    /// <summary>Saw tooth from Min to Max over the period.</summary>
+    Ramp,
+    /// <summary>Switches between Min and Max (0/1 for coils) every interval.</summary>
+    Toggle,
+}
+
+/// <summary>Value simulation for one cell of a slave window.</summary>
+public sealed class CellSimulation
+{
+    public SimulationMode Mode { get; set; } = SimulationMode.Increment;
+    public double Min { get; set; }
+    public double Max { get; set; } = 100;
+    public double Step { get; set; } = 1;
+    public int IntervalMs { get; set; } = 1000;
+    public double PeriodSeconds { get; set; } = 60;
+
+    public CellSimulation Clone() => (CellSimulation)MemberwiseClone();
+}

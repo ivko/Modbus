@@ -11,34 +11,42 @@ Both cover Modbus TCP, UDP, RTU, ASCII, RTU/ASCII over TCP/UDP and Modbus/TCP Se
 | Automation | COM `ModbusMaster.*` and `ModbusSlave.*` | Excel VBA, VBScript, Python pywin32. Same members as the Modbus Poll and Modbus Slave automation interfaces |
 | Library | `Modbus.Core.dll` | C#, PowerShell 7.5+ |
 
-The manuals are `docs/manual/index.html` (master) and `docs/manual/slave.html` (slave), also opened with F1.
+The user manuals are in `docs/manual`: `index.html` for the master and `slave.html` for the slave.
+Both programs open them with F1.
 
 ## Build
 
-Requires the .NET 10 SDK on Windows.
+Requires the .NET 10 SDK on Windows. Run the commands from the repository root.
 
 ```
 dotnet build -c Release
 dotnet test
 ```
 
-Publish everything into one folder (framework dependent, needs the .NET 10 Desktop Runtime):
+## Install
+
+Publish the three programs into one folder. `publish` is used here; it is ignored by git.
 
 ```
-dotnet publish src/Modbus.App -c Release -o E:\tools\ModbusMaster
-dotnet publish src/Modbus.Slave -c Release -o E:\tools\ModbusMaster
-dotnet publish src/Modbus.Cli -c Release -o E:\tools\ModbusMaster
+dotnet publish src/Modbus.App -c Release -o publish
+dotnet publish src/Modbus.Slave -c Release -o publish
+dotnet publish src/Modbus.Cli -c Release -o publish
 ```
 
-Register automation for the current user (no administrator rights needed):
+The folder is self-contained apart from the .NET 10 Desktop Runtime. Copy it wherever the programs
+should live; the manuals and examples are inside it.
+
+Register automation for the current user from the final location (no administrator rights needed):
 
 ```
-E:\tools\ModbusMaster\ModbusMaster.exe /regserver
-E:\tools\ModbusMaster\ModbusSlave.exe /regserver
+ModbusMaster.exe /regserver
+ModbusSlave.exe /regserver
 ```
 
-Add `/compat` to also register `Mbpoll.*` (master) or `Mbslave.*` (slave), so scripts written for
-Modbus Poll or Modbus Slave run unchanged. Do not do that while those programs are installed and in use. Run it again after moving the program folder.
+Registration stores the full path of each program, so register again after moving the folder.
+`/unregserver` removes it. Add `/compat` to also register `Mbpoll.*` (master) or `Mbslave.*` (slave),
+so scripts written for Modbus Poll or Modbus Slave run unchanged. Do not do that while those programs
+are installed and in use.
 
 ## Layout
 
@@ -49,8 +57,11 @@ src/Modbus.App    master program and its automation
 src/Modbus.Slave  slave program and its automation
 src/Modbus.Cli    mbm command line
 tests/            unit and end-to-end tests (simulator over TCP, RTU, ASCII and TLS)
-docs/manual       user manual
+docs/manual       user manuals
 examples          Excel VBA, Python, VBScript, PowerShell, Test Center strings
 ```
 
-NuGet packages are restored to `E:\tools\nuget\packages` (see `nuget.config`).
+## NuGet cache
+
+`nuget.config` sets `globalPackagesFolder`, the folder where NuGet keeps downloaded packages.
+Change it to a folder that exists on your machine, or remove that line to use the NuGet default.

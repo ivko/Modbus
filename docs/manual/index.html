@@ -575,11 +575,11 @@ out = subprocess.run(["mbm", "read", "--tcp", "192.168.1.10", "--count", "4", "-
 print(json.loads(out.stdout)["values"])</pre>
 
 <h2 id="library">21. .NET library</h2>
-<p><code>ModbusMaster.Core.dll</code> contains the whole Modbus engine. Use it from C#, F# or PowerShell for scripts that need more than mbm offers.</p>
-<pre>Add-Type -Path "C:\path\to\ModbusMaster\ModbusMaster.Core.dll"
-$s = [ModbusMaster.Core.ConnectionSettings]::new()
+<p><code>Modbus.Core.dll</code> contains the whole Modbus engine. Use it from C#, F# or PowerShell for scripts that need more than mbm offers.</p>
+<pre>Add-Type -Path "C:\path\to\ModbusMaster\Modbus.Core.dll"
+$s = [Modbus.Core.ConnectionSettings]::new()
 $s.Kind = "Tcp"; $s.Host = "192.168.1.10"; $s.Port = 502
-$c = [ModbusMaster.Core.ModbusConnection]::Create($s)
+$c = [Modbus.Core.ModbusConnection]::Create($s)
 $c.Open()
 $c.ReadHoldingRegisters(1, 0, 10)
 $c.WriteSingleRegister(1, 40, 1500)

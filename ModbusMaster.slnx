@@ -1,12 +1,12 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/ModbusMaster.App/ModbusMaster.App.csproj" />
-    <Project Path="src/ModbusMaster.Cli/ModbusMaster.Cli.csproj" />
-    <Project Path="src/ModbusMaster.Core/ModbusMaster.Core.csproj" />
-    <Project Path="src/ModbusMaster.Slave/ModbusMaster.Slave.csproj" />
-    <Project Path="src/ModbusMaster.Ui/ModbusMaster.Ui.csproj" />
+    <Project Path="src/Modbus.App/Modbus.App.csproj" />
+    <Project Path="src/Modbus.Cli/Modbus.Cli.csproj" />
+    <Project Path="src/Modbus.Core/Modbus.Core.csproj" />
+    <Project Path="src/Modbus.Slave/Modbus.Slave.csproj" />
+    <Project Path="src/Modbus.Ui/Modbus.Ui.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/ModbusMaster.Tests/ModbusMaster.Tests.csproj" />
+    <Project Path="tests/Modbus.Tests/Modbus.Tests.csproj" />
   </Folder>
 </Solution>

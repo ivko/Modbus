@@ -9,7 +9,7 @@ Both cover Modbus TCP, UDP, RTU, ASCII, RTU/ASCII over TCP/UDP and Modbus/TCP Se
 | Slave simulator | `ModbusSlave.exe` | Simulated devices with value and error simulation (delay, missing answers, CRC errors, exceptions) |
 | Command line | `mbm.exe` | Batch files, PowerShell, Python `subprocess`, CI |
 | Automation | COM `ModbusMaster.*` and `ModbusSlave.*` | Excel VBA, VBScript, Python pywin32. Same members as the Modbus Poll and Modbus Slave automation interfaces |
-| Library | `ModbusMaster.Core.dll` | C#, PowerShell 7.5+ |
+| Library | `Modbus.Core.dll` | C#, PowerShell 7.5+ |
 
 The manuals are `docs/manual/index.html` (master) and `docs/manual/slave.html` (slave), also opened with F1.
 
@@ -25,9 +25,9 @@ dotnet test
 Publish everything into one folder (framework dependent, needs the .NET 10 Desktop Runtime):
 
 ```
-dotnet publish src/ModbusMaster.App -c Release -o E:\tools\ModbusMaster
-dotnet publish src/ModbusMaster.Slave -c Release -o E:\tools\ModbusMaster
-dotnet publish src/ModbusMaster.Cli -c Release -o E:\tools\ModbusMaster
+dotnet publish src/Modbus.App -c Release -o E:\tools\ModbusMaster
+dotnet publish src/Modbus.Slave -c Release -o E:\tools\ModbusMaster
+dotnet publish src/Modbus.Cli -c Release -o E:\tools\ModbusMaster
 ```
 
 Register automation for the current user (no administrator rights needed):
@@ -43,14 +43,14 @@ Modbus Poll or Modbus Slave run unchanged. Do not do that while those programs a
 ## Layout
 
 ```
-src/ModbusMaster.Core   protocol, transports, framing, poll scheduler, scanners, slave engine and servers
-src/ModbusMaster.Ui     shared WPF parts: data grid, chart, traffic window, dialogs, COM server plumbing
-src/ModbusMaster.App    master program and its automation
-src/ModbusMaster.Slave  slave program and its automation
-src/ModbusMaster.Cli    mbm command line
-tests/                  unit and end-to-end tests (simulator over TCP, RTU, ASCII and TLS)
-docs/manual             user manual
-examples                Excel VBA, Python, VBScript, PowerShell, Test Center strings
+src/Modbus.Core   protocol, transports, framing, poll scheduler, scanners, slave engine and servers
+src/Modbus.Ui     shared WPF parts: data grid, chart, traffic window, dialogs, COM server plumbing
+src/Modbus.App    master program and its automation
+src/Modbus.Slave  slave program and its automation
+src/Modbus.Cli    mbm command line
+tests/            unit and end-to-end tests (simulator over TCP, RTU, ASCII and TLS)
+docs/manual       user manual
+examples          Excel VBA, Python, VBScript, PowerShell, Test Center strings
 ```
 
 NuGet packages are restored to `E:\tools\nuget\packages` (see `nuget.config`).

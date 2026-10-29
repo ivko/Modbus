@@ -131,6 +131,7 @@ public static class SlaveDialogs
         var d = current.Clone();
         var f = new FormDialog("Slave Definition", "definition");
         var name = f.AddText("Window name", title);
+        f.AddInfo("Leave the name empty to name the tab after its definition, e.g. \"ID 1 · 03 Holding 0–9\".");
         var slave = f.AddText("Slave ID", d.SlaveId.ToString(), 90);
         f.AddInfo("1 to 247 on a serial line (255 allowed). On TCP many masters send 0 or 255; turn on Ignore unit ID in the connection setup to answer them.");
         var table = f.AddCombo("Function", Tables.Select(t => new Choice<FunctionCode>(t, TableName(t))), d.Function);
@@ -162,7 +163,7 @@ public static class SlaveDialogs
             d.ScanRateMs = 0;
             return null;
         };
-        return f.ShowModal() ? (d, name.Text.Trim().Length > 0 ? name.Text.Trim() : title) : null;
+        return f.ShowModal() ? (d, name.Text.Trim()) : null;
     }
 
     // ---- error simulation ----

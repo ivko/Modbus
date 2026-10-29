@@ -148,7 +148,7 @@ public sealed class SlaveAutomationDocument : DispatchTarget
             Prop("ChecksumErrorPercent", 103, () => Device.Errors.ChecksumErrorPercent, v => Device.Errors.ChecksumErrorPercent = Pct(v)),
             Prop("ExceptionCode", 104, () => (short)Device.Errors.ExceptionCode, v => Device.Errors.ExceptionCode = (byte)Math.Clamp(I(v), 0, 255)),
             Method("GetRequestCount", 105, 0, _ => (int)Doc.TxCount),
-            Prop("Title", 106, () => Doc.Title, v => Doc.Title = S(v)),
+            Prop("Title", 106, () => Doc.DisplayTitle, v => { Doc.Title = S(v); _view.Invalidate(); }),
             Void("Close", 107, 0, _ => App.Shell.CloseView(_view)),
         };
         return list;

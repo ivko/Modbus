@@ -32,7 +32,6 @@ public sealed class MainWindow : Window
     private readonly MenuItem _disconnectItem;
     private readonly Dictionary<PollDocument, ChartWindow> _charts = [];
     private string? _workspacePath;
-    private int _windowCounter;
 
     public MainWindow()
     {
@@ -173,8 +172,7 @@ public sealed class MainWindow : Window
 
     public void NewWindow()
     {
-        var doc = new PollDocument { Title = $"Mbpoll{++_windowCounter}" };
-        AddDocument(doc);
+        AddDocument(new PollDocument());
     }
 
     public PollView AddDocument(PollDocument doc, bool select = true)
@@ -182,15 +180,14 @@ public sealed class MainWindow : Window
         var view = new PollView(doc) { IsOnline = () => AppState.Current.IsConnected };
         view.EditRequested += EditValue;
         var header = new StackPanel { Orientation = Orientation.Horizontal };
-        var title = new TextBlock { Text = doc.Title, VerticalAlignment = VerticalAlignment.Center };
         var close = new Button
         {
             Content = "x", Padding = new Thickness(4, 0, 4, 1), Margin = new Thickness(8, 0, 0, 0), Background = Brushes.Transparent,
             BorderThickness = new Thickness(0), ToolTip = "Close window (Ctrl+F4)", VerticalAlignment = VerticalAlignment.Center,
         };
-        header.Children.Add(title);
+        header.Children.Add(view.Header);
         header.Children.Add(close);
-        var tab = new TabItem { Header = header, Content = view, Tag = title };
+        var tab = new TabItem { Header = header, Content = view };
         close.Click += (_, _) => CloseView(view);
         _tabs.Items.Add(tab);
         if (select) _tabs.SelectedItem = tab;
@@ -220,12 +217,6 @@ public sealed class MainWindow : Window
     {
         if (CurrentView is { } v) action(v);
         else _statusHint.Text = "No data window. Create one with File > New Window (Ctrl+N).";
-    }
-
-    private void RefreshTitle(PollView view)
-    {
-        var tab = _tabs.Items.Cast<TabItem>().FirstOrDefault(t => t.Content == view);
-        if (tab?.Tag is TextBlock t) t.Text = view.Document.Title;
     }
 
     private void SyncMenu()
@@ -286,12 +277,12 @@ public sealed class MainWindow : Window
 
     private void EditDefinition() => WithCurrent(v =>
     {
-        var result = DefinitionDialog.Show(v.Document.Definition, v.Document.Title);
+        var result = DefinitionDialog.Show(v.Document.Definition, v.Document.HasCustomTitle ? v.Document.Title : "");
         if (result is not { } r) return;
         v.Document.Title = r.Title;
         v.Document.ApplyDefinition(r.Definition);
         v.Rebuild();
-        RefreshTitle(v);
+
         SyncMenu();
         AppState.Current.Scheduler.Kick(v.Document);
     });
@@ -299,7 +290,7 @@ public sealed class MainWindow : Window
     private void StartLog() => WithCurrent(v =>
     {
         var f = new FormDialog("Log", "logging");
-        var path = f.AddText("Log file", v.Logger?.Options.Path ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), $"{v.Document.Title}.csv"));
+        var path = f.AddText("Log file", v.Logger?.Options.Path ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), $"{v.Document.FileNameTitle}.csv"));
         var browse = f.AddButton("Browse...", () =>
         {
             var dlg = new SaveFileDialog { Filter = "CSV (*.csv)|*.csv|Text (*.txt)|*.txt", FileName = Path.GetFileName(path.Text), OverwritePrompt = false };
@@ -329,7 +320,7 @@ public sealed class MainWindow : Window
         try
         {
             v.Logger = new DataLogger(v.Document, options);
-            _statusHint.Text = $"Logging {v.Document.Title} to {options.Path}";
+            _statusHint.Text = $"Logging {v.Document.DisplayTitle} to {options.Path}";
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -528,7 +519,7 @@ public sealed class MainWindow : Window
 
     private void SaveWindowFile() => WithCurrent(v =>
     {
-        var dlg = new SaveFileDialog { Filter = WindowFilter, FileName = v.Document.Title + ".mmp" };
+        var dlg = new SaveFileDialog { Filter = WindowFilter, FileName = v.Document.FileNameTitle + ".mmp" };
         if (dlg.ShowDialog(this) == true) new Workspace { Windows = [v.Document.CloneDefinitionOnly()] }.Save(dlg.FileName);
     });
 
@@ -541,7 +532,7 @@ public sealed class MainWindow : Window
     private void ExportCsv() => WithCurrent(v =>
     {
         var doc = v.Document;
-        var dlg = new SaveFileDialog { Filter = "CSV (*.csv)|*.csv", FileName = doc.Title + ".csv" };
+        var dlg = new SaveFileDialog { Filter = "CSV (*.csv)|*.csv", FileName = doc.FileNameTitle + ".csv" };
         if (dlg.ShowDialog(this) != true) return;
         var values = doc.Definition.IsWriteWindow ? doc.WriteValues : doc.Values;
         var sb = new StringBuilder("Address;Name;Value;Format\r\n");

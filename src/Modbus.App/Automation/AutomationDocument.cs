@@ -35,7 +35,6 @@ public sealed class AutomationDocument : DispatchTarget
             var main = App.Shell;
             var doc = new PollDocument
             {
-                Title = $"Mbpoll{main.Views.Count() + 1}",
                 Definition = new PollDefinition { Disabled = true },
             };
             _view = main.AddDocument(doc, select: !main.IsVisible);
@@ -129,7 +128,7 @@ public sealed class AutomationDocument : DispatchTarget
 
         // Extensions (not in Modbus Poll).
         list.Add(Void("Close", 101, 0, 0, _ => App.Shell.CloseView(_view)));
-        list.Add(new DispMember { Name = "Title", DispId = 102, Kind = DispKind.Property, Get = _ => Doc.Title, Set = (_, v) => { Doc.Title = S(v); } });
+        list.Add(new DispMember { Name = "Title", DispId = 102, Kind = DispKind.Property, Get = _ => Doc.DisplayTitle, Set = (_, v) => { Doc.Title = S(v); _view.Invalidate(); } });
         return list;
     }
 

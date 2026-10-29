@@ -108,3 +108,31 @@ public class CellLayoutTests
         Assert.True(doc.IsContinuation(8));
     }
 }
+
+public class WindowTitleTests
+{
+    [Fact]
+    public void Tabs_are_named_after_the_definition_unless_named_by_the_user()
+    {
+        var doc = new Modbus.Core.Polling.PollDocument
+        {
+            Definition = new Modbus.Core.Polling.PollDefinition { SlaveId = 1, Function = FunctionCode.ReadHoldingRegisters, Address = 0, Quantity = 10 },
+        };
+        Assert.Equal("ID 1 · 03 Holding 0–9", doc.DisplayTitle);
+
+        doc.Definition.PlcAddresses = true;
+        Assert.Equal("ID 1 · 03 Holding 40001–40010", doc.DisplayTitle);
+
+        doc.Definition = new Modbus.Core.Polling.PollDefinition { SlaveId = 3, Function = FunctionCode.WriteSingleCoil, Address = 7 };
+        Assert.Equal("ID 3 · 05 Write Coil 7", doc.DisplayTitle);
+
+        doc.Title = "Mbpoll2";               // old default names stay automatic
+        Assert.False(doc.HasCustomTitle);
+        doc.Title = "Pump 1";
+        Assert.Equal("Pump 1", doc.DisplayTitle);
+
+        doc.Definition = new Modbus.Core.Polling.PollDefinition { Function = FunctionCode.ReadWriteMultipleRegisters, Quantity = 2 };
+        doc.Title = "";
+        Assert.DoesNotContain('/', doc.FileNameTitle);
+    }
+}

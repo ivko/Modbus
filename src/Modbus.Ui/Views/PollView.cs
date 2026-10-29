@@ -153,6 +153,9 @@ public sealed class PollView : DockPanel
     public PollDocument Document { get; }
     public DataGrid Grid { get; }
 
+    /// <summary>Text for the tab: the user's window name, or the automatic "ID 1 · 03 Holding 0–9".</summary>
+    public TextBlock Header { get; } = new() { VerticalAlignment = VerticalAlignment.Center };
+
     /// <summary>False shows <see cref="OfflineText"/> instead of the last result.</summary>
     public Func<bool> IsOnline { get; set; } = () => true;
     public string OfflineText { get; set; } = "No connection";
@@ -216,6 +219,8 @@ public sealed class PollView : DockPanel
         _dirty = false;
         var d = Document;
         var def = d.Definition;
+        Header.Text = d.DisplayTitle;
+        Header.ToolTip = d.HasCustomTitle ? def.ShortDescription() : null;
         _status.Text = StatusText?.Invoke(d) ?? $"Tx = {d.TxCount}: Err = {d.ErrorCount}: {def.Describe()}{(def.Disabled ? "  [disabled]" : "")}";
 
         _error.Text = ErrorText is not null ? ErrorText(d)

@@ -250,7 +250,7 @@ public sealed class ChartWindow : Window
     {
         AppIcon.Apply(this);
         _doc = doc;
-        Title = $"Chart - {doc.Title}";
+        Title = $"Chart - {doc.DisplayTitle}";
         Width = 900;
         Height = 480;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;

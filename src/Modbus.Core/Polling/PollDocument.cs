@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Modbus.Core.Data;
 using Modbus.Core.Protocol;
 
@@ -47,6 +48,27 @@ public sealed class PollDefinition
 
     public string Describe() =>
         $"ID = {SlaveId}: F = {(byte)Function:D2}: SR = {ScanRateMs}ms";
+
+    /// <summary>Short name for a tab, e.g. "ID 1 · 03 Holding 0–9" (PLC addresses when they are switched on).</summary>
+    public string ShortDescription()
+    {
+        var name = Function switch
+        {
+            FunctionCode.ReadCoils => "01 Coils",
+            FunctionCode.ReadDiscreteInputs => "02 Inputs",
+            FunctionCode.ReadHoldingRegisters => "03 Holding",
+            FunctionCode.ReadInputRegisters => "04 Input Registers",
+            FunctionCode.WriteSingleCoil => "05 Write Coil",
+            FunctionCode.WriteSingleRegister => "06 Write Register",
+            FunctionCode.WriteMultipleCoils => "15 Write Coils",
+            FunctionCode.WriteMultipleRegisters => "16 Write Registers",
+            FunctionCode.ReadWriteMultipleRegisters => "23 Read/Write",
+            _ => $"{(byte)Function:D2}",
+        };
+        var first = PlcAddresses ? Address + FunctionCodes.PlcBase(Function) : Address;
+        var range = CellCount <= 1 ? $"{first}" : $"{first}–{first + CellCount - 1}";
+        return $"ID {SlaveId} · {name} {range}";
+    }
 }
 
 /// <summary>Per-cell settings: name, format, scaling, colors, value names.</summary>
@@ -82,7 +104,21 @@ public sealed class PollDocument
     private ushort[] _values = [];
     private ushort[] _writeValues = [];
 
-    public string Title { get; set; } = "Mbpoll1";
+    private static readonly Regex DefaultTitle = new(@"^Mb(poll|slave)\d+$", RegexOptions.CultureInvariant);
+
+    /// <summary>The name given by the user; empty (or an old "Mbpoll1"-style default) means automatic.</summary>
+    public string Title { get; set; } = "";
+
+    [JsonIgnore]
+    public bool HasCustomTitle => !string.IsNullOrWhiteSpace(Title) && !DefaultTitle.IsMatch(Title.Trim());
+
+    /// <summary>What the tab shows: the user's name, or a description of the definition.</summary>
+    [JsonIgnore]
+    public string DisplayTitle => HasCustomTitle ? Title.Trim() : Definition.ShortDescription();
+
+    /// <summary><see cref="DisplayTitle"/> without characters that are not allowed in file names.</summary>
+    [JsonIgnore]
+    public string FileNameTitle => string.Concat(DisplayTitle.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '-' : c));
     public PollDefinition Definition { get; set; } = new();
 
     /// <summary>Settings keyed by cell index (0 = first address).</summary>

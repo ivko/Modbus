@@ -189,7 +189,7 @@
 <p>Setup &gt; Read/Write Definition (<kbd>F8</kbd>) sets what the current window does.</p>
 <table>
   <tr><th>Field</th><th>Meaning</th></tr>
-  <tr><td>Window name</td><td>The tab title.</td></tr>
+  <tr><td>Window name</td><td>The tab title. Leave it empty and the tab is named after the definition, for example <i>ID 1 · 03 Holding 0–9</i>; the name then follows every change of the definition.</td></tr>
   <tr><td>Slave ID</td><td>Serial: the device address, 1 to 247. 0 is broadcast and only allowed for writes; nobody answers. TCP: the unit ID. Many TCP devices ignore it; gateways use it to pick the serial device.</td></tr>
   <tr><td>Function</td><td>01 to 04 read, 05/06/15/16 write, 23 read and write in one request.</td></tr>
   <tr><td>Address</td><td>First address. See <a href="#addresses">addresses</a>.</td></tr>

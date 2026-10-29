@@ -22,6 +22,7 @@ public static class DefinitionDialog
         var d = current.Clone();
         var f = new FormDialog("Read/Write Definition", "definition");
         var name = f.AddText("Window name", title);
+        f.AddInfo("Leave the name empty to name the tab after its definition, e.g. \"ID 1 · 03 Holding 0–9\".");
         var slave = f.AddText("Slave ID", d.SlaveId.ToString(), 90);
         f.AddInfo("Serial: slave address 1-247 (0 = broadcast, writes only). TCP: unit ID; many devices ignore it.");
         var function = f.AddCombo("Function", WindowFunctions.Select(fc => new Choice<FunctionCode>(fc, FunctionCodes.Describe(fc))), d.Function);
@@ -69,6 +70,6 @@ public static class DefinitionDialog
         };
 
         if (d.PlcAddresses) address.Text = (d.Address + FunctionCodes.PlcBase(d.Function)).ToString();
-        return f.ShowModal() ? (d, name.Text.Trim().Length > 0 ? name.Text.Trim() : title) : null;
+        return f.ShowModal() ? (d, name.Text.Trim()) : null;
     }
 }

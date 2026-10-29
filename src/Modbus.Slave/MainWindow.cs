@@ -30,7 +30,6 @@ public sealed class MainWindow : Window
     private readonly MenuItem _plcItem = new() { Header = "_PLC Addresses (Base 1)", IsCheckable = true };
     private readonly Dictionary<PollDocument, ChartWindow> _charts = [];
     private string? _workspacePath;
-    private int _counter;
 
     private static SlaveState State => SlaveState.Current;
 
@@ -135,7 +134,6 @@ public sealed class MainWindow : Window
     {
         var doc = new PollDocument
         {
-            Title = $"Mbslave{++_counter}",
             Definition = new PollDefinition { SlaveId = slaveId, Function = table, Address = address, Quantity = quantity, ScanRateMs = 0 },
         };
         return AddDocument(doc, select);
@@ -149,16 +147,15 @@ public sealed class MainWindow : Window
             ErrorText = d => !State.IsRunning ? "Not connected. Press F3 to start the slave." : ErrorLine(d),
         };
         view.EditRequested += EditValue;
-        var title = new TextBlock { Text = doc.Title, VerticalAlignment = VerticalAlignment.Center };
         var close = new Button
         {
             Content = "x", Padding = new Thickness(4, 0, 4, 1), Margin = new Thickness(8, 0, 0, 0), Background = Brushes.Transparent,
             BorderThickness = new Thickness(0), VerticalAlignment = VerticalAlignment.Center, ToolTip = "Close window (Ctrl+F4)",
         };
         var header = new StackPanel { Orientation = Orientation.Horizontal };
-        header.Children.Add(title);
+        header.Children.Add(view.Header);
         header.Children.Add(close);
-        var tab = new TabItem { Header = header, Content = view, Tag = title };
+        var tab = new TabItem { Header = header, Content = view };
         close.Click += (_, _) => CloseView(view);
         _tabs.Items.Add(tab);
         if (select) _tabs.SelectedItem = tab;
@@ -260,20 +257,19 @@ public sealed class MainWindow : Window
 
     private void EditDefinition() => WithCurrent(v =>
     {
-        var r = SlaveDialogs.Definition(v.Document.Definition, v.Document.Title);
+        var r = SlaveDialogs.Definition(v.Document.Definition, v.Document.HasCustomTitle ? v.Document.Title : "");
         if (r is not { } result) return;
         v.Document.Title = result.Title;
         v.Document.Definition = result.Definition;
         State.Engine.WindowChanged(v.Document);
         v.Rebuild();
-        if (_tabs.SelectedItem is TabItem { Tag: TextBlock t }) t.Text = result.Title;
         SyncMenu();
     });
 
     private void StartLog() => WithCurrent(v =>
     {
         var f = new FormDialog("Log", "logging");
-        var path = f.AddText("Log file", v.Logger?.Options.Path ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), $"{v.Document.Title}.csv"));
+        var path = f.AddText("Log file", v.Logger?.Options.Path ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), $"{v.Document.FileNameTitle}.csv"));
         f.AddButton("Browse...", () =>
         {
             var dlg = new SaveFileDialog { Filter = "CSV (*.csv)|*.csv", FileName = Path.GetFileName(path.Text), OverwritePrompt = false };
@@ -297,7 +293,7 @@ public sealed class MainWindow : Window
         try
         {
             v.Logger = new DataLogger(v.Document, options);
-            _statusHint.Text = $"Logging {v.Document.Title} to {options.Path}";
+            _statusHint.Text = $"Logging {v.Document.DisplayTitle} to {options.Path}";
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -470,7 +466,7 @@ public sealed class MainWindow : Window
     private void ExportCsv() => WithCurrent(v =>
     {
         var doc = v.Document;
-        var dlg = new SaveFileDialog { Filter = "CSV (*.csv)|*.csv", FileName = doc.Title + ".csv" };
+        var dlg = new SaveFileDialog { Filter = "CSV (*.csv)|*.csv", FileName = doc.FileNameTitle + ".csv" };
         if (dlg.ShowDialog(this) != true) return;
         var values = doc.Values;
         var sb = new StringBuilder("Address;Name;Value;Raw\r\n");

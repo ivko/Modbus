@@ -1,0 +1,14 @@
+# Test Center strings. Lines starting with # are comments.
+# With "Add checksum / header" on, type slave ID + PDU; CRC, LRC or MBAP is added.
+# Read 10 holding registers from slave 1, address 0
+01 03 00 00 00 0A
+# Read 8 coils from slave 1, address 0
+01 01 00 00 00 08
+# Write 1234 (0x04D2) to holding register 10
+01 06 00 0A 04 D2
+# Diagnostics: return query data (echo A5 37)
+01 08 00 00 A5 37
+# Report server ID
+01 11
+# Illegal function test (function 0x2B)
+01 2B 0E 01 00

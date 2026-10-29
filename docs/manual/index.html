@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modbus Master User Manual</title>
+<style>
+  :root { --fg:#1d2430; --muted:#5b6575; --line:#dde2e8; --accent:#1f5faf; --code:#f3f5f8; --warn:#fff6e0; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.55 "Segoe UI", system-ui, sans-serif; color:var(--fg); background:#fff; }
+  nav { position:fixed; top:0; left:0; bottom:0; width:260px; overflow:auto; padding:18px 14px; border-right:1px solid var(--line); background:#fafbfc; font-size:14px; }
+  nav h2 { font-size:15px; margin:0 0 10px; }
+  nav a { display:block; color:var(--fg); text-decoration:none; padding:2px 6px; border-radius:4px; }
+  nav a:hover { background:#e9eef5; }
+  nav a.sub { padding-left:20px; color:var(--muted); }
+  main { margin-left:260px; padding:24px 40px 80px; max-width:1000px; }
+  h1 { font-size:28px; margin:0 0 4px; }
+  h2 { font-size:22px; margin:42px 0 10px; padding-top:10px; border-top:1px solid var(--line); }
+  h3 { font-size:17px; margin:24px 0 6px; }
+  code, pre, kbd { font-family: Consolas, "Cascadia Mono", monospace; font-size:13px; }
+  code { background:var(--code); padding:1px 4px; border-radius:3px; }
+  pre { background:var(--code); padding:10px 12px; border-radius:6px; overflow:auto; line-height:1.4; }
+  kbd { border:1px solid #c5ccd6; border-bottom-width:2px; border-radius:3px; padding:0 4px; background:#fff; }
+  table { border-collapse:collapse; margin:8px 0 14px; width:100%; }
+  th, td { border:1px solid var(--line); padding:4px 8px; text-align:left; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .note { background:var(--warn); border-left:4px solid #e0a800; padding:8px 12px; border-radius:4px; margin:10px 0; }
+  .muted { color:var(--muted); }
+  @media (max-width: 800px) { nav { position:static; width:auto; border-right:0; border-bottom:1px solid var(--line); } main { margin-left:0; padding:16px; } }
+</style>
+</head>
+<body>
+<nav>
+  <h2>Modbus Master</h2>
+  <a href="#intro">1. Introduction</a>
+  <a href="#quick-start">2. Quick start</a>
+  <a href="#overview">3. Windows and cells</a>
+  <a href="#connection">4. Connection setup</a>
+  <a class="sub" href="#connection-serial">Serial settings</a>
+  <a class="sub" href="#connection-network">Remote server</a>
+  <a class="sub" href="#connection-tls">Modbus/TCP Security</a>
+  <a class="sub" href="#connection-timing">Timing</a>
+  <a href="#definition">5. Read/Write definition</a>
+  <a class="sub" href="#addresses">Addresses</a>
+  <a class="sub" href="#write-windows">Write windows</a>
+  <a href="#functions">6. Functions menu</a>
+  <a href="#formats">7. Display formats</a>
+  <a href="#scaling">8. Scaling</a>
+  <a href="#colors">9. Conditional colors</a>
+  <a href="#value-names">10. Value names</a>
+  <a href="#chart">11. Real-time charting</a>
+  <a href="#address-scan">12. Address scan</a>
+  <a href="#slave-scan">13. Slave scan</a>
+  <a href="#workspace">14. Workspaces and files</a>
+  <a href="#export-csv">15. Export to CSV</a>
+  <a href="#test-center">16. Test Center</a>
+  <a href="#logging">17. Data logging</a>
+  <a href="#traffic">18. Communication traffic</a>
+  <a href="#automation">19. Automation (COM)</a>
+  <a class="sub" href="#automation-register">Registration</a>
+  <a class="sub" href="#automation-application">Application object</a>
+  <a class="sub" href="#automation-document">Document object</a>
+  <a class="sub" href="#automation-data">Data properties</a>
+  <a class="sub" href="#automation-results">Result codes</a>
+  <a class="sub" href="#automation-examples">Examples</a>
+  <a href="#cli">20. Command line (mbm)</a>
+  <a href="#library">21. .NET library</a>
+  <a href="#errors">22. Errors and exceptions</a>
+  <a href="#shortcuts">23. Keyboard shortcuts</a>
+</nav>
+<main>
+
+<h1>Modbus Master User Manual</h1>
+<p class="muted">Version 1.0 · Modbus master for test, commissioning and scripting.</p>
+
+<h2 id="intro">1. Introduction</h2>
+<p>Modbus Master is a Modbus <em>master</em> (client): it sends requests to slave devices (servers) such as PLCs, drives, meters and sensors, and shows the answers. It has three parts that share the same Modbus engine:</p>
+<ul>
+  <li><b>ModbusMaster.exe</b>, the Windows program with data windows, charts, logging, scans and the Test Center.</li>
+  <li><b>mbm.exe</b>, a command line tool for batch files, PowerShell and any other scripting language. See <a href="#cli">chapter 20</a>.</li>
+  <li><b>Automation (COM)</b>: Excel VBA, VBScript, Python and other COM clients can control the program. The interface uses the same member names and numbers as Modbus Poll. See <a href="#automation">chapter 19</a>.</li>
+</ul>
+<h3>Supported connections</h3>
+<ul>
+  <li>Serial port, RTU or ASCII mode (RS-232, RS-485 through USB converters).</li>
+  <li>Modbus TCP/IP and Modbus UDP/IP.</li>
+  <li>Modbus RTU or ASCII frames over TCP/IP or UDP/IP (serial device servers and gateways).</li>
+  <li>Modbus/TCP Security: Modbus TCP over TLS 1.2/1.3 with X.509 certificates.</li>
+</ul>
+<h3>Supported functions</h3>
+<table>
+  <tr><th>Code</th><th>Function</th><th>Where</th></tr>
+  <tr><td>01</td><td>Read Coils</td><td>Data window, scans, automation, mbm</td></tr>
+  <tr><td>02</td><td>Read Discrete Inputs</td><td>Data window, scans, automation, mbm</td></tr>
+  <tr><td>03</td><td>Read Holding Registers</td><td>Data window, scans, automation, mbm</td></tr>
+  <tr><td>04</td><td>Read Input Registers</td><td>Data window, scans, automation, mbm</td></tr>
+  <tr><td>05</td><td>Write Single Coil</td><td>Functions menu, write window, automation, mbm</td></tr>
+  <tr><td>06</td><td>Write Single Register</td><td>Functions menu, write window, automation, mbm</td></tr>
+  <tr><td>08</td><td>Diagnostics</td><td>Functions menu, mbm</td></tr>
+  <tr><td>15</td><td>Write Multiple Coils</td><td>Functions menu, write window, automation, mbm</td></tr>
+  <tr><td>16</td><td>Write Multiple Registers</td><td>Functions menu, write window, automation, mbm</td></tr>
+  <tr><td>17</td><td>Report Server ID</td><td>Functions menu, mbm</td></tr>
+  <tr><td>22</td><td>Mask Write Register</td><td>Functions menu, mbm</td></tr>
+  <tr><td>23</td><td>Read/Write Multiple Registers</td><td>Data window, Functions menu, mbm</td></tr>
+</table>
+<h3>System requirements</h3>
+<p>Windows 10 or 11, 64-bit, with the .NET 10 Desktop Runtime. A self-contained build needs no runtime.</p>
+
+<h2 id="quick-start">2. Quick start</h2>
+<ol>
+  <li>Start <b>ModbusMaster.exe</b>. An empty data window called Mbpoll1 opens.</li>
+  <li>Press <kbd>F3</kbd> (Connection &gt; Connect). Choose the connection type and settings and press OK. The status bar turns green when the connection is open.</li>
+  <li>Press <kbd>F8</kbd> (Setup &gt; Read/Write Definition). Enter the slave ID, function, address, quantity and scan rate. Example: slave 1, function 03, address 0, quantity 10, 1000 ms.</li>
+  <li>The window now reads the registers every scan rate. Double click a value to write a new one.</li>
+  <li>Press <kbd>Ctrl</kbd>+<kbd>N</kbd> for more windows, for example another slave ID or another address range. All windows share the connection.</li>
+</ol>
+<p>No device at hand? Start the built-in simulator from a command prompt and connect to <code>127.0.0.1</code> port <code>1502</code>:</p>
+<pre>mbm serve --port 1502 --simulate</pre>
+<p>With <code>--simulate</code>, input registers 0 to 2 change every second, so you can try charts and logging.</p>
+
+<h2 id="overview">3. Windows and cells</h2>
+<p>Each tab is one <b>data window</b>. It reads or writes one block of data with its own slave ID, function, address, quantity and scan rate. You can open as many windows as you need.</p>
+<p>The top of each window shows a status line:</p>
+<pre>Tx = 128: Err = 2: ID = 1: F = 03: SR = 1000ms</pre>
+<p>Tx counts the requests sent, Err the failed ones. Below it, a red line shows the last error, for example <i>Timeout error</i> or <i>Exception 02: Illegal Data Address</i>. The line disappears when the next request succeeds.</p>
+<h3>Name cells</h3>
+<p>The Name column is free text. Click it and type a name such as "Pump speed". Names are saved in the workspace and appear in logs, CSV exports and chart legends.</p>
+<h3>Value cells</h3>
+<p>The Value column shows the data in the chosen <a href="#formats">display format</a>. Select one or more rows (Shift/Ctrl+click) before you change the format, scaling, colors or value names. Double click a value, or press <kbd>Enter</kbd>, to write to it:</p>
+<ul>
+  <li>Coils (function 01): opens Write Single Coil with the opposite value.</li>
+  <li>Holding registers (03, 23): opens Write Register in the cell's format. 32 and 64-bit formats are written with function 16.</li>
+  <li>Discrete inputs (02) and input registers (04) are read-only.</li>
+  <li>Write windows (05, 06, 15, 16): changes the value that the window writes. See <a href="#write-windows">write windows</a>.</li>
+</ul>
+<p>When a 32 or 64-bit format starts at a cell, the following cells it covers stay empty.</p>
+<p>Press <kbd>F1</kbd> in any dialog to open the matching chapter of this manual.</p>
+
+<h2 id="connection">4. Connection setup</h2>
+<p>Connection &gt; Connect (<kbd>F3</kbd>) opens the setup and connects. Connection &gt; Quick Connect (<kbd>F5</kbd>) connects again with the last settings, and Disconnect (<kbd>F4</kbd>) closes the connection. The last used settings are remembered.</p>
+<table>
+  <tr><th>Connection type</th><th>Use it for</th></tr>
+  <tr><td>Serial port</td><td>RS-232/RS-485 devices. RTU or ASCII mode.</td></tr>
+  <tr><td>Modbus TCP/IP</td><td>Ethernet devices. Standard port 502.</td></tr>
+  <tr><td>Modbus UDP/IP</td><td>Devices that answer Modbus TCP frames over UDP.</td></tr>
+  <tr><td>Modbus RTU/ASCII over TCP/IP</td><td>Serial device servers and gateways that pass serial frames through a TCP socket unchanged.</td></tr>
+  <tr><td>Modbus RTU/ASCII over UDP/IP</td><td>The same over UDP.</td></tr>
+  <tr><td>Modbus/TCP Security</td><td>Modbus TCP inside TLS. Standard port 802.</td></tr>
+</table>
+<h3 id="connection-serial">Serial settings</h3>
+<table>
+  <tr><th>Setting</th><th>Notes</th></tr>
+  <tr><td>Serial port</td><td>The list shows the ports Windows reports. You can also type a name such as COM12.</td></tr>
+  <tr><td>Baud rate</td><td>300 to 921600 from the list, or type any rate your adapter supports.</td></tr>
+  <tr><td>Data bits</td><td>8 for RTU. ASCII mode often uses 7.</td></tr>
+  <tr><td>Parity</td><td>The Modbus standard default is Even. Many devices use None with 2 stop bits or None with 1 stop bit.</td></tr>
+  <tr><td>Stop bits</td><td>1 or 2.</td></tr>
+  <tr><td>Mode</td><td>RTU (binary frames with CRC) or ASCII (text frames starting with ':' with LRC).</td></tr>
+  <tr><td>Remove echo</td><td>Turn on when the RS-485 converter returns the bytes it just sent.</td></tr>
+  <tr><td>DTR / RTS on</td><td>Some isolated converters take power from these lines.</td></tr>
+</table>
+<h3 id="connection-network">Remote server</h3>
+<p>Enter the IP address or host name and the port. <b>IPv6</b> prefers IPv6 addresses when a host name resolves to both. <b>Connect timeout</b> is how long to wait for the TCP connection itself.</p>
+<p>For RTU/ASCII over TCP/UDP, choose the mode (RTU or ASCII) that the gateway expects.</p>
+<h3 id="connection-tls">Modbus/TCP Security</h3>
+<p>Modbus/TCP Security wraps Modbus TCP in TLS 1.2 or 1.3. Most devices require a client certificate.</p>
+<table>
+  <tr><th>Field</th><th>Notes</th></tr>
+  <tr><td>Client certificate</td><td>A <code>.pfx</code>/<code>.p12</code> file with the private key inside, or a <code>.pem</code>/<code>.crt</code> certificate.</td></tr>
+  <tr><td>Private key</td><td>The PEM key file when the certificate file does not contain the key.</td></tr>
+  <tr><td>Certificate or key password</td><td>For a protected PFX or an encrypted PEM key. It is never saved to disk.</td></tr>
+  <tr><td>Trusted CA</td><td>The certificate of the CA that signed the device certificate. When set, only this CA is trusted. When empty, the Windows certificate store decides.</td></tr>
+  <tr><td>Server name</td><td>The name in the device certificate, if it differs from the address you connect to.</td></tr>
+  <tr><td>Accept any server certificate</td><td>Skips server verification. Use it only for tests on a closed network.</td></tr>
+</table>
+<h3 id="connection-timing">Timing</h3>
+<table>
+  <tr><th>Setting</th><th>Default</th><th>Meaning</th></tr>
+  <tr><td>Response timeout</td><td>1000 ms</td><td>How long to wait for a complete answer before reporting a timeout.</td></tr>
+  <tr><td>Delay between polls</td><td>20 ms</td><td>Minimum silence after an answer before the next request. Slow serial devices need 20 to 100 ms.</td></tr>
+  <tr><td>Connect timeout</td><td>1000 ms</td><td>TCP connection timeout.</td></tr>
+</table>
+
+<h2 id="definition">5. Read/Write definition</h2>
+<p>Setup &gt; Read/Write Definition (<kbd>F8</kbd>) sets what the current window does.</p>
+<table>
+  <tr><th>Field</th><th>Meaning</th></tr>
+  <tr><td>Window name</td><td>The tab title.</td></tr>
+  <tr><td>Slave ID</td><td>Serial: the device address, 1 to 247. 0 is broadcast and only allowed for writes; nobody answers. TCP: the unit ID. Many TCP devices ignore it; gateways use it to pick the serial device.</td></tr>
+  <tr><td>Function</td><td>01 to 04 read, 05/06/15/16 write, 23 read and write in one request.</td></tr>
+  <tr><td>Address</td><td>First address. See <a href="#addresses">addresses</a>.</td></tr>
+  <tr><td>Quantity</td><td>Number of coils or registers. Limits: 2000 bits, 125 registers for reads, 1968 coils and 123 registers for writes.</td></tr>
+  <tr><td>Write address</td><td>Function 23 only: where the write part goes. The read part uses Address and Quantity.</td></tr>
+  <tr><td>Scan rate</td><td>Time from one request of this window to the next, 0 to 3600000 ms. 0 polls as fast as the device answers. A scan rate shorter than the transaction time makes no difference.</td></tr>
+  <tr><td>Read/Write disabled</td><td>The window stops polling. Press <kbd>F6</kbd> (Read/Write Once) to send one request.</td></tr>
+</table>
+<h3 id="addresses">Addresses</h3>
+<p>The protocol always counts from 0. Many manuals list PLC addresses that count from 1 and add a prefix per table. Turn on <b>PLC addresses</b> to work with those numbers; you can type either form.</p>
+<table>
+  <tr><th>Table</th><th>Function</th><th>PLC address</th><th>Protocol address</th><th>Access</th></tr>
+  <tr><td>Coils</td><td>01, 05, 15</td><td>1 to 9999 (0xxxx)</td><td>PLC address - 1</td><td>Read/Write</td></tr>
+  <tr><td>Discrete inputs</td><td>02</td><td>10001 to 19999 (1xxxx)</td><td>PLC address - 10001</td><td>Read</td></tr>
+  <tr><td>Input registers</td><td>04</td><td>30001 to 39999 (3xxxx)</td><td>PLC address - 30001</td><td>Read</td></tr>
+  <tr><td>Holding registers</td><td>03, 06, 16, 22, 23</td><td>40001 to 49999 (4xxxx)</td><td>PLC address - 40001</td><td>Read/Write</td></tr>
+</table>
+<p>Example: a manual that says "speed setpoint at 40011" means function 03 (or 06/16 to write), protocol address 10.</p>
+<h3 id="write-windows">Write windows</h3>
+<p>With function 05, 06, 15 or 16 the window <em>writes</em> its values every scan rate instead of reading. Double click a value to change what is written. Use Read/Write disabled plus <kbd>F6</kbd> to write only when you choose.</p>
+
+<h2 id="functions">6. Functions menu</h2>
+<p>The Functions menu sends single requests without changing any window. Each dialog stays open so you can send again; the result appears in green, an error in red. The slave ID and address start with the values of the selected cell.</p>
+<table>
+  <tr><th>Function</th><th>Notes</th></tr>
+  <tr><td>05 Write Single Coil</td><td>On sends FF00, Off sends 0000.</td></tr>
+  <tr><td>06 Write Single Register</td><td>Enter the value in any 16-bit format. For 32/64-bit formats the dialog uses function 16.</td></tr>
+  <tr><td>15 Write Multiple Coils</td><td>Values 1/0 separated by commas.</td></tr>
+  <tr><td>16 Write Multiple Registers</td><td>Values in the chosen format, separated by commas. Each 32-bit value takes 2 registers, each 64-bit value 4.</td></tr>
+  <tr><td>17 Report Server ID</td><td>Shows the answer as hex and text.</td></tr>
+  <tr><td>22 Mask Write Register</td><td>Result = (Current AND And_Mask) OR (Or_Mask AND NOT And_Mask). Example: current 0x12, AND 0xF2, OR 0x25 gives 0x17.</td></tr>
+  <tr><td>23 Read/Write Multiple Registers</td><td>Writes first, then returns the read block.</td></tr>
+  <tr><td>08 Diagnostics</td><td>Sub-functions 00 to 20. 00 returns the data you send. 01 restarts communication; data must be 0x0000 or 0xFF00. 04 puts the slave in listen-only mode until it is restarted.</td></tr>
+</table>
+<p>Functions &gt; Test Center (<kbd>Ctrl</kbd>+<kbd>T</kbd>) sends any bytes; see <a href="#test-center">chapter 16</a>.</p>
+
+<h2 id="formats">7. Display formats</h2>
+<p>Select cells and choose a format from the Display menu. Shortcuts: <kbd>Alt</kbd>+<kbd>S</kbd> signed, <kbd>Alt</kbd>+<kbd>U</kbd> unsigned, <kbd>Alt</kbd>+<kbd>H</kbd> hex, <kbd>Alt</kbd>+<kbd>B</kbd> binary.</p>
+<p>A register holds 16 bits. Larger values use 2 registers (32-bit integers and floats) or 4 registers (64-bit integers and doubles). Devices disagree about the order of the bytes, so each large format comes in four byte orders. Take the 32-bit value 123456789 (hex 07 5B CD 15) as an example:</p>
+<table>
+  <tr><th>Byte order</th><th>Bytes on the wire</th><th>Registers</th><th>Typical devices</th></tr>
+  <tr><td>Big-endian (ABCD)</td><td>07 5B CD 15</td><td>075B CD15</td><td>The Modbus standard; most PLCs</td></tr>
+  <tr><td>Little-endian byte swap (CDAB)</td><td>CD 15 07 5B</td><td>CD15 075B</td><td>"Word swapped"; many meters and drives</td></tr>
+  <tr><td>Big-endian byte swap (BADC)</td><td>5B 07 15 CD</td><td>5B07 15CD</td><td>Rare</td></tr>
+  <tr><td>Little-endian (DCBA)</td><td>15 CD 5B 07</td><td>15CD 5B07</td><td>Rare</td></tr>
+</table>
+<p>If a float looks like nonsense, try CDAB first.</p>
+<h3>Format numbers</h3>
+<p>The automation functions SetFormat, GetFormat and FormatAll use these numbers:</p>
+<table>
+  <tr><th>ID</th><th>Format</th><th>ID</th><th>Format</th></tr>
+  <tr><td>0</td><td>Signed</td><td>15</td><td>32-bit Signed Big-endian byte swap</td></tr>
+  <tr><td>1</td><td>Unsigned</td><td>17</td><td>32-bit Unsigned Big-endian</td></tr>
+  <tr><td>2</td><td>Hex</td><td>18</td><td>32-bit Unsigned Little-endian byte swap</td></tr>
+  <tr><td>3</td><td>Binary</td><td>19</td><td>32-bit Unsigned Big-endian byte swap</td></tr>
+  <tr><td>4</td><td>Float Little-endian byte swap</td><td>20</td><td>32-bit Unsigned Little-endian</td></tr>
+  <tr><td>5</td><td>Float Big-endian</td><td>21</td><td>64-bit Signed Big-endian</td></tr>
+  <tr><td>6</td><td>Double Little-endian byte swap</td><td>22</td><td>64-bit Signed Little-endian byte swap</td></tr>
+  <tr><td>7</td><td>Double Big-endian</td><td>23</td><td>64-bit Signed Big-endian byte swap</td></tr>
+  <tr><td>8</td><td>32-bit Signed Little-endian byte swap</td><td>24</td><td>64-bit Signed Little-endian</td></tr>
+  <tr><td>9</td><td>32-bit Signed Big-endian</td><td>25</td><td>64-bit Unsigned Big-endian</td></tr>
+  <tr><td>10</td><td>Float Little-endian</td><td>26</td><td>64-bit Unsigned Little-endian byte swap</td></tr>
+  <tr><td>11</td><td>Float Big-endian byte swap</td><td>27</td><td>64-bit Unsigned Big-endian byte swap</td></tr>
+  <tr><td>12</td><td>Double Little-endian</td><td>28</td><td>64-bit Unsigned Little-endian</td></tr>
+  <tr><td>13</td><td>Double Big-endian byte swap</td><td></td><td></td></tr>
+  <tr><td>14</td><td>32-bit Signed Little-endian</td><td></td><td></td></tr>
+</table>
+
+<h2 id="scaling">8. Scaling</h2>
+<p>Display &gt; Scaling converts raw values into engineering units with a straight line:</p>
+<pre>value = ScaledMin + (raw - RawMin) × (ScaledMax - ScaledMin) / (RawMax - RawMin)</pre>
+<p>Example: a 4-20 mA input reads 0 to 4000. Set raw 0 to 4000 and scaled 4 to 20 with 1 decimal; a raw value of 2000 shows 12.0. Scaling is applied after the display format, so it also works for floats and 32-bit integers. Charts and logs use the scaled value.</p>
+
+<h2 id="colors">9. Conditional colors</h2>
+<p>Display &gt; Conditional Colors sets a background and text color for the selected cells, plus two rules. Rule 1 is checked first, then rule 2. If no rule matches, the normal colors are used.</p>
+<table>
+  <tr><th>Rule</th><th>Matches when</th></tr>
+  <tr><td>equal to</td><td>value = compare</td></tr>
+  <tr><td>greater than / less than</td><td>value &gt; compare / value &lt; compare</td></tr>
+  <tr><td>greater/less than or equal to</td><td>value ≥ compare / value ≤ compare</td></tr>
+  <tr><td>and</td><td>(value AND compare) ≠ 0. Use it to highlight a status bit, e.g. compare 4 for bit 2.</td></tr>
+</table>
+
+<h2 id="value-names">10. Value names</h2>
+<p>Display &gt; Value Names shows a text instead of a number, one entry per line:</p>
+<pre>0=Stopped
+1=Running
+2=Fault</pre>
+<p>Values without an entry are shown as numbers. Hex values such as <code>0x10=Alarm</code> are allowed.</p>
+
+<h2 id="chart">11. Real-time charting</h2>
+<p>Select one or more value cells and choose Display &gt; Link to Chart (<kbd>Ctrl</kbd>+<kbd>L</kbd>). A chart window opens for that data window, and each linked cell becomes a line. Link a cell again to remove it.</p>
+<table>
+  <tr><th>Action</th><th>How</th></tr>
+  <tr><td>Zoom the time axis</td><td>Mouse wheel over the chart</td></tr>
+  <tr><td>Pan</td><td>Drag with the left mouse button</td></tr>
+  <tr><td>Follow live data again</td><td>Double click the chart</td></tr>
+  <tr><td>Time span</td><td>10 s to 8 hours in the toolbar</td></tr>
+  <tr><td>Fixed Y axis</td><td>Enter Y min / Y max. Leave empty for automatic scale.</td></tr>
+  <tr><td>Pause</td><td>Stops adding points; the device is still polled</td></tr>
+  <tr><td>Export series</td><td>Saves all points as CSV with one column per series</td></tr>
+  <tr><td>Save as PNG</td><td>Saves the visible chart as an image</td></tr>
+</table>
+<p>Each series keeps up to 1,000,000 points; the oldest points are dropped after that. Hex and binary cells are charted as their numeric value.</p>
+
+<h2 id="address-scan">12. Address scan</h2>
+<p>Tools &gt; Address Scan finds which addresses of one slave can be read. It reads the range in blocks (default 100). When a block fails with an exception, it retries that block one address at a time. The result lists every readable address with its value. Turn on "Show addresses that return an exception" to also list the failures. Export CSV saves the list.</p>
+<p class="note">A large range on a slow serial line takes time: 10000 addresses at 9600 baud with blocks of 100 needs about 100 requests, but each failing block adds up to 100 more.</p>
+
+<h2 id="slave-scan">13. Slave scan</h2>
+<p>Tools &gt; Slave Scan sends one read to every slave ID in a range and lists the ones that answer. A slave that returns an exception also counts as found: it exists, but does not have that address. Use a short response timeout (e.g. 200 ms) so the scan is fast. On TCP, most devices answer every unit ID.</p>
+
+<h2 id="workspace">14. Workspaces and files</h2>
+<table>
+  <tr><th>File</th><th>Contains</th><th>Menu</th></tr>
+  <tr><td><code>*.mmw</code> workspace</td><td>The connection settings and all data windows with names, formats, scaling, colors and value names</td><td>File &gt; Open/Save Workspace (<kbd>Ctrl</kbd>+<kbd>O</kbd> / <kbd>Ctrl</kbd>+<kbd>S</kbd>)</td></tr>
+  <tr><td><code>*.mmp</code> window</td><td>One data window</td><td>File &gt; Open/Save Window</td></tr>
+</table>
+<p>Both are readable JSON files. Certificate passwords are never saved. You can drop a file on the window or pass it on the command line: <code>ModbusMaster.exe plant.mmw</code>. The command line tool can reuse the connection of a workspace with <code>--connection plant.mmw</code>.</p>
+
+<h2 id="export-csv">15. Export to CSV</h2>
+<p>File &gt; Export to CSV saves the current window: address, name, formatted value and format, separated by semicolons. Excel opens the file directly.</p>
+
+<h2 id="test-center">16. Test Center</h2>
+<p>Functions &gt; Test Center sends any bytes and shows the raw answer. Use it to test devices that do not follow the standard, or to reproduce a problem exactly.</p>
+<ul>
+  <li>Type hex bytes, e.g. <code>01 03 00 00 00 0A</code> (slave ID, function, data).</li>
+  <li>With <b>Add checksum / header</b> on, the program adds the CRC for RTU, the ':' framing and LRC for ASCII, or the MBAP header for TCP/UDP, depending on the connection.</li>
+  <li>With it off, the bytes are sent exactly as typed. Start with ':' to send ASCII text as typed; CR LF is added.</li>
+  <li>The answer is shown as hex, with a note whether the CRC/LRC is correct and whether it is an exception.</li>
+  <li>Save frequently used strings with <b>Add to list</b> and <b>Save strings</b>. The file is plain text, one string per line; lines starting with # are comments. Double click a string to send it.</li>
+</ul>
+
+<h2 id="logging">17. Data logging</h2>
+<p>Setup &gt; Log writes the current window to a CSV file. Each row contains the time, the formatted value of each cell (named columns when the cell has a name) and the poll status.</p>
+<table>
+  <tr><th>Option</th><th>Meaning</th></tr>
+  <tr><td>Log every [s]</td><td>0 logs every poll; otherwise at most one row per interval</td></tr>
+  <tr><td>Delimiter</td><td>Semicolon, comma or tab</td></tr>
+  <tr><td>Only log when a value changed</td><td>Skips rows identical to the previous one</td></tr>
+  <tr><td>Log errors / errors only</td><td>Write failed polls (with empty values and the error text), or only those</td></tr>
+  <tr><td>New log file at midnight</td><td>Adds the date to the file name and starts a new file every day</td></tr>
+</table>
+<p>Setup &gt; Logging Off stops logging for the window. The file is appended to, never overwritten, and can be opened while logging runs.</p>
+
+<h2 id="traffic">18. Communication traffic</h2>
+<p>Display &gt; Communication (<kbd>F7</kbd>) shows every frame on the wire:</p>
+<pre>18:02:10.251 Tx: 00 01 00 00 00 06 01 03 00 0A 00 02
+18:02:10.265 Rx: 00 01 00 00 00 07 01 03 04 F5 C3 40 48</pre>
+<p>Serial RTU frames include the CRC; ASCII frames are shown as text. Late answers to an earlier request and incomplete frames are marked. Stop freezes the list, Save writes the full history (last 20000 frames) to a text file.</p>
+
+<h2 id="automation">19. Automation (COM)</h2>
+<p>Modbus Master is an automation server. Excel, Word, VBScript, Python (pywin32), LabVIEW and other COM clients can create data windows, read and write values and control the connection.</p>
+<p>The interface uses the <b>same member names, numbers and DISPIDs as the Modbus Poll automation interface</b>. Scripts written for Modbus Poll work with Modbus Master; only the object names in <code>CreateObject</code> change, or none at all with the compatible names (below).</p>
+
+<h3 id="automation-register">Registration</h3>
+<p>Choose Tools &gt; Register Automation, or run once:</p>
+<pre>ModbusMaster.exe /regserver
+ModbusMaster.exe /regserver /compat     (also registers Mbpoll.Application and Mbpoll.Document)
+ModbusMaster.exe /unregserver</pre>
+<table>
+  <tr><th>Object name (ProgID)</th><th>Object</th></tr>
+  <tr><td><code>ModbusMaster.Application</code></td><td>Connection setup</td></tr>
+  <tr><td><code>ModbusMaster.Document</code></td><td>One data window</td></tr>
+  <tr><td><code>Mbpoll.Application</code>, <code>Mbpoll.Document</code></td><td>Optional compatible names, so existing scripts run unchanged</td></tr>
+</table>
+<p class="note">Registration is per Windows user and needs no administrator rights. Programs that run as administrator do not see per-user registrations. If Modbus Poll is installed too, registering the compatible names makes scripts on your user account use Modbus Master. Leave them off to keep both programs, and change the names in your scripts.</p>
+<p>When a script creates an object and Modbus Master is not running, Windows starts it hidden. Call <code>ShowWindow</code> to show it. A hidden instance exits when the script releases all objects. If Modbus Master is already running, scripts control the running program.</p>
+<p>Modbus Master is 64-bit; 32-bit Excel and 32-bit Python work as well, because the objects live in a separate process.</p>
+
+<h3 id="automation-application">Application object</h3>
+<p>The settings take effect at the next <code>OpenConnection</code>.</p>
+<table>
+  <tr><th>Member</th><th>Type</th><th>Values</th></tr>
+  <tr><td>Connection</td><td>Integer</td><td>0 Serial port, 1 Modbus TCP/IP, 2 Modbus UDP/IP, 3 RTU/ASCII over TCP/IP, 4 RTU/ASCII over UDP/IP, 5 Modbus/TCP Security</td></tr>
+  <tr><td>SerialPort</td><td>Integer</td><td>1 to 255 (COM1...)</td></tr>
+  <tr><td>BaudRate</td><td>Long</td><td>e.g. 9600, 19200, 115200</td></tr>
+  <tr><td>DataBits</td><td>Integer</td><td>7 or 8</td></tr>
+  <tr><td>Parity</td><td>Integer</td><td>0 None, 1 Odd, 2 Even</td></tr>
+  <tr><td>StopBits</td><td>Integer</td><td>1 or 2</td></tr>
+  <tr><td>Mode</td><td>Integer</td><td>0 RTU, 1 ASCII (serial and RTU/ASCII over TCP/UDP)</td></tr>
+  <tr><td>RemoveEcho</td><td>Integer</td><td>0 or 1</td></tr>
+  <tr><td>ResponseTimeout</td><td>Integer</td><td>50 to 100000 ms (default 1000)</td></tr>
+  <tr><td>DelayBetweenPolls</td><td>Integer</td><td>0 to 1000 ms (default 20)</td></tr>
+  <tr><td>IPAddress</td><td>String</td><td>IP address or host name</td></tr>
+  <tr><td>ServerPort</td><td>Long</td><td>0 to 65535 (default 502)</td></tr>
+  <tr><td>ConnectTimeout</td><td>Integer</td><td>100 to 30000 ms</td></tr>
+  <tr><td>IPVersion</td><td>Integer</td><td>4 or 6</td></tr>
+  <tr><td>CertFilePath, KeyFilePath</td><td>String</td><td>Client certificate and key for Modbus/TCP Security (PEM, or a PFX in CertFilePath)</td></tr>
+  <tr><td>OpenConnection()</td><td>Integer</td><td>Opens the connection. Returns 0 on success, otherwise an <a href="#errors-open">open error number</a>. 255 = already open.</td></tr>
+  <tr><td>CloseConnection()</td><td>Integer</td><td>Closes the connection. Returns 0.</td></tr>
+  <tr><td>ShowCommunicationTraffic()</td><td></td><td>Opens the traffic window</td></tr>
+  <tr><td>CloseCommunicationTraffic()</td><td></td><td>Closes it</td></tr>
+  <tr><td>Visible</td><td>Boolean</td><td>Extension: shows or hides the main window</td></tr>
+</table>
+
+<h3 id="automation-document">Document object</h3>
+<p>Each <code>CreateObject("ModbusMaster.Document")</code> creates a data window. It is hidden until <code>ShowWindow</code> is called. Indexes always count from 0, whatever the address.</p>
+<table>
+  <tr><th>Member</th><th>Returns</th><th>Description</th></tr>
+  <tr><td>ReadCoils(SlaveID, Address, Quantity, ScanRate)</td><td>Integer</td><td>Function 01 window. 1 = accepted, 0 = invalid arguments. Quantity 1 to 2000, scan rate 0 to 3600000 ms.</td></tr>
+  <tr><td>ReadDiscreteInputs(...)</td><td>Integer</td><td>Function 02, same arguments</td></tr>
+  <tr><td>ReadHoldingRegisters(...)</td><td>Integer</td><td>Function 03, quantity 1 to 125</td></tr>
+  <tr><td>ReadInputRegisters(...)</td><td>Integer</td><td>Function 04, quantity 1 to 125</td></tr>
+  <tr><td>ReadResult()</td><td>Integer</td><td>Result of the window's last request; see <a href="#automation-results">result codes</a>. 10 until the first answer.</td></tr>
+  <tr><td>WriteSingleCoil(SlaveID, Address)</td><td>Integer</td><td>Function 05 with the first value of the write array. No window is created.</td></tr>
+  <tr><td>WriteSingleRegister(SlaveID, Address)</td><td>Integer</td><td>Function 06 with the first value of the write array</td></tr>
+  <tr><td>WriteMultipleCoils(SlaveID, Address, Quantity)</td><td>Integer</td><td>Function 15 with the first Quantity values of the write array</td></tr>
+  <tr><td>WriteMultipleRegisters(SlaveID, Address, Quantity)</td><td>Integer</td><td>Function 16 with the first Quantity registers of the write array</td></tr>
+  <tr><td>WriteResult()</td><td>Integer</td><td>Result of the last write; 10 until the slave has answered</td></tr>
+  <tr><td>WriteSingleCoilWin(SlaveID, Address, ScanRate)</td><td>Integer</td><td>Makes this a function 05 write window that writes every ScanRate</td></tr>
+  <tr><td>WriteSingleRegisterWin(SlaveID, Address, ScanRate)</td><td>Integer</td><td>Function 06 write window</td></tr>
+  <tr><td>WriteMultipleCoilsWin(SlaveID, Address, Quantity, ScanRate)</td><td>Integer</td><td>Function 15 write window</td></tr>
+  <tr><td>WriteMultipleRegistersWin(SlaveID, Address, Quantity, ScanRate)</td><td>Integer</td><td>Function 16 write window</td></tr>
+  <tr><td>ShowWindow()</td><td></td><td>Shows Modbus Master and selects this window</td></tr>
+  <tr><td>ReadWriteDisabled</td><td>Boolean</td><td>Property: stop or start polling for this window</td></tr>
+  <tr><td>ReadWriteOnce()</td><td></td><td>One request (use with ReadWriteDisabled = True)</td></tr>
+  <tr><td>GetTxCount(), GetRxCount()</td><td>Long</td><td>Requests sent and answers received by this window</td></tr>
+  <tr><td>GetName(Index), SetName(Index, Name)</td><td>String</td><td>Cell names</td></tr>
+  <tr><td>GetFormat(Index), SetFormat(Index, Format), FormatAll(Format)</td><td>Integer</td><td>Display formats; see the <a href="#formats">format numbers</a></td></tr>
+  <tr><td>ByteOrder</td><td>Integer</td><td>Property used by the typed data properties: 0 Big-endian (default), 1 Little-endian byte swap, 2 Big-endian byte swap, 3 Little-endian</td></tr>
+  <tr><td>EnableRefresh</td><td>Boolean</td><td>Set False while you change many cells, True when done</td></tr>
+  <tr><td>Rows(n), ResizeWindow(), ResizeAllColumns()</td><td></td><td>Accepted for compatibility; the grid always fits the quantity</td></tr>
+  <tr><td>Save(PathName), Open(PathName)</td><td>Long</td><td>Save or load this window as a <code>.mmp</code> file. 1 = success.</td></tr>
+  <tr><td>ColorsSetColors(Item, R, G, B)</td><td>Long</td><td>Item 0/1 normal background/text, 2/3 rule 1, 4/5 rule 2</td></tr>
+  <tr><td>ColorsSetRules(Rule1, Rule2)</td><td>Long</td><td>0 not used, 1 equal, 2 greater, 3 less, 4 greater or equal, 5 less or equal, 6 and</td></tr>
+  <tr><td>ColorsSetCompares(Compare1, Compare2)</td><td>Long</td><td>Compare values of the two rules</td></tr>
+  <tr><td>ColorsUpdateCell(Index)</td><td>Long</td><td>Applies the prepared colors and rules to a cell</td></tr>
+  <tr><td>ColorsClear()</td><td></td><td>Resets the prepared colors and rules. Apply with ColorsUpdateCell to clear a cell.</td></tr>
+  <tr><td>Title</td><td>String</td><td>Extension: the window name</td></tr>
+  <tr><td>Close()</td><td></td><td>Extension: closes the window</td></tr>
+</table>
+
+<h3 id="automation-data">Data properties</h3>
+<p>Each data property exists twice:</p>
+<ul>
+  <li><b>Without "Win"</b> (e.g. <code>SRegisters</code>): reading returns the values the window last read. Writing fills an internal write array that the one-shot write functions send. These properties use <code>ByteOrder</code>.</li>
+  <li><b>With "Win"</b> (e.g. <code>SRegistersWin</code>): reads and changes the values shown in the window itself. Use them with write windows, so the new values are written on the next scan. They use the cell's display format byte order.</li>
+</ul>
+<table>
+  <tr><th>Property</th><th>Type</th><th>Registers</th></tr>
+  <tr><td>Coils(Index), CoilsWin(Index)</td><td>Integer 0/1</td><td>1 bit</td></tr>
+  <tr><td>SRegisters(Index), SRegistersWin(Index)</td><td>Integer (signed 16-bit)</td><td>1</td></tr>
+  <tr><td>URegisters(Index), URegistersWin(Index)</td><td>Long (unsigned 16-bit)</td><td>1</td></tr>
+  <tr><td>Longs(Index)</td><td>Long (signed 32-bit)</td><td>2</td></tr>
+  <tr><td>Ints_32(Index), Ints_32Win(Index)</td><td>Double (signed 32-bit)</td><td>2</td></tr>
+  <tr><td>UInts_32(Index), UInts_32Win(Index)</td><td>Double (unsigned 32-bit)</td><td>2</td></tr>
+  <tr><td>Ints_64(Index), Ints_64Win(Index)</td><td>Double (signed 64-bit)</td><td>4</td></tr>
+  <tr><td>UInts_64(Index), UInts_64Win(Index)</td><td>Double (unsigned 64-bit)</td><td>4</td></tr>
+  <tr><td>Floats(Index), FloatsWin(Index)</td><td>Single</td><td>2</td></tr>
+  <tr><td>Doubles(Index), DoublesWin(Index)</td><td>Double</td><td>4</td></tr>
+</table>
+<p>The index is a register index. Three floats therefore use indexes 0, 2 and 4 and are written with <code>WriteMultipleRegisters(id, address, 6)</code>. In VBA write <code>doc.SRegisters(0) = 1</code>. In Python write <code>doc.SRegisters(0, 1)</code> and read <code>doc.SRegisters(0)</code>.</p>
+<p class="note">In Python always call methods with parentheses: <code>app.OpenConnection()</code>, <code>doc.ReadResult()</code>, <code>doc.GetTxCount()</code>. Without them Python returns the method instead of calling it. Some Modbus Poll examples omit the parentheses; add them when you reuse those scripts.</p>
+<p class="note">64-bit values are returned as Double, which holds integers exactly only up to 2<sup>53</sup>.</p>
+
+<h3 id="automation-results">Result codes</h3>
+<p>ReadResult and WriteResult return:</p>
+<table>
+  <tr><th>Code</th><th>Meaning</th><th>Code</th><th>Meaning</th></tr>
+  <tr><td>0</td><td>Success</td><td>81h (129)</td><td>Illegal function</td></tr>
+  <tr><td>1</td><td>Timeout error</td><td>82h (130)</td><td>Illegal data address</td></tr>
+  <tr><td>2</td><td>CRC/LRC error</td><td>83h (131)</td><td>Illegal data value</td></tr>
+  <tr><td>3</td><td>Response error (other slave ID, function or address)</td><td>84h (132)</td><td>Server device failure</td></tr>
+  <tr><td>4</td><td>Write error</td><td>85h (133)</td><td>Acknowledge</td></tr>
+  <tr><td>5</td><td>Read error</td><td>86h (134)</td><td>Server device busy</td></tr>
+  <tr><td>6</td><td>Port not open (no connection)</td><td>87h (135)</td><td>Negative acknowledge</td></tr>
+  <tr><td>10</td><td>Data uninitialized (no answer yet)</td><td>8Ah (138)</td><td>Gateway path unavailable</td></tr>
+  <tr><td>11</td><td>Insufficient bytes received</td><td>8Bh (139)</td><td>Gateway target device failed to respond</td></tr>
+  <tr><td>16</td><td>Byte count error</td><td></td><td></td></tr>
+</table>
+
+<h3 id="automation-examples">Examples</h3>
+<p>The <code>examples</code> folder next to the program contains these scripts ready to run.</p>
+<h3>Excel VBA</h3>
+<pre>Public app As Object, doc1 As Object, doc2 As Object
+
+Private Sub StartModbus_Click()
+    Set app = CreateObject("ModbusMaster.Application")
+    Set doc1 = CreateObject("ModbusMaster.Document")
+    Set doc2 = CreateObject("ModbusMaster.Document")
+    doc1.ReadHoldingRegisters 1, 0, 10, 1000   ' 10 holding registers every 1000 ms
+    doc2.ReadCoils 1, 0, 10, 1000              ' 10 coils every 1000 ms
+    app.Connection = 1                         ' Modbus TCP/IP
+    app.IPAddress = "192.168.1.10"
+    app.ServerPort = 502
+    If app.OpenConnection() &lt;&gt; 0 Then MsgBox "Connection failed"
+End Sub
+
+Private Sub Read_Click()
+    Dim n As Integer
+    Cells(2, 4) = doc1.ReadResult()
+    For n = 0 To 9
+        Cells(2 + n, 2) = doc1.SRegisters(n)
+        Cells(2 + n, 3) = doc2.Coils(n)
+    Next n
+End Sub
+
+Private Sub Write_Click()
+    doc1.Floats(0) = Cells(2, 6)               ' fills registers 0-1 of the write array
+    doc1.WriteMultipleRegisters 1, 100, 2      ' writes them to address 100
+End Sub</pre>
+<h3>Python (pywin32)</h3>
+<pre>import time
+import win32com.client as win32
+
+app = win32.Dispatch("ModbusMaster.Application")
+app.Connection = 0          # serial
+app.SerialPort = 3          # COM3
+app.BaudRate = 19200
+app.Parity = 0              # none
+app.Mode = 0                # RTU
+if app.OpenConnection() != 0:
+    raise SystemExit("connection failed")
+
+win = win32.Dispatch("ModbusMaster.Document")
+win.ReadHoldingRegisters(1, 0, 10, 500)
+win.ShowWindow()
+win.SetFormat(0, 5)         # float big-endian on registers 0-1
+time.sleep(1)
+if win.ReadResult() == 0:
+    print("register 2 =", win.SRegisters(2))
+win.SRegisters(0, 1234)     # Python style property put into the write array
+win.WriteSingleRegister(1, 20)</pre>
+<h3>VBScript</h3>
+<pre>Set app = CreateObject("ModbusMaster.Application")
+app.Connection = 1 : app.IPAddress = "127.0.0.1" : app.ServerPort = 502
+Set doc = CreateObject("ModbusMaster.Document")
+doc.ReadInputRegisters 1, 0, 4, 500
+app.OpenConnection
+WScript.Sleep 1000
+WScript.Echo doc.ReadResult() &amp; " " &amp; doc.URegisters(0)</pre>
+<p>PowerShell needs type information that this interface does not provide. Use <a href="#cli">mbm</a> or the <a href="#library">.NET library</a> from PowerShell instead.</p>
+
+<h2 id="cli">20. Command line (mbm)</h2>
+<p><code>mbm.exe</code> runs one request (or a loop) and exits. It is meant for batch files, PowerShell, Python <code>subprocess</code>, schedulers and CI. With <code>--json</code> every result is one JSON line, easy to parse in any language.</p>
+<pre>mbm &lt;command&gt; &lt;connection&gt; [options]</pre>
+<h3>Commands</h3>
+<table>
+  <tr><th>Command</th><th>Does</th></tr>
+  <tr><td>read</td><td>Functions 01 to 04. <code>--fc</code> or <code>--table coils|inputs|holding|input-registers</code>, <code>--address</code>, <code>--count</code>, <code>--format</code>, <code>--byte-order</code>, <code>--watch --interval MS</code>, <code>--csv FILE</code>, <code>--plain</code></td></tr>
+  <tr><td>write</td><td>Functions 05, 06, 15, 16. <code>--address</code>, <code>--values 1,2,3</code>, <code>--coils</code>, <code>--format</code>, <code>--fc</code></td></tr>
+  <tr><td>mask</td><td>Function 22. <code>--address --and --or</code></td></tr>
+  <tr><td>rw</td><td>Function 23. <code>--read-address --read-count --write-address --values</code></td></tr>
+  <tr><td>id</td><td>Function 17</td></tr>
+  <tr><td>diag</td><td>Function 08. <code>--sub --data</code></td></tr>
+  <tr><td>raw</td><td>Any PDU: <code>--pdu "03 00 00 00 0A"</code>; prints the response PDU</td></tr>
+  <tr><td>scan</td><td>Slave scan: <code>--units 1-247</code></td></tr>
+  <tr><td>scan-addresses</td><td>Address scan: <code>--addresses 0-9999 --block 100</code></td></tr>
+  <tr><td>ports</td><td>Lists serial ports</td></tr>
+  <tr><td>serve</td><td>Slave simulator: <code>--port 502 --framing tcp|rtu|ascii --simulate --units 1-5 --log</code></td></tr>
+</table>
+<h3>Connections</h3>
+<table>
+  <tr><th>Option</th><th>Connection</th></tr>
+  <tr><td><code>--tcp HOST[:PORT]</code></td><td>Modbus TCP</td></tr>
+  <tr><td><code>--udp HOST[:PORT]</code></td><td>Modbus UDP</td></tr>
+  <tr><td><code>--rtu-tcp</code>, <code>--rtu-udp</code>, <code>--ascii-tcp</code>, <code>--ascii-udp</code></td><td>Serial frames over TCP/UDP</td></tr>
+  <tr><td><code>--tls HOST[:PORT]</code></td><td>Modbus/TCP Security with <code>--cert --cert-password --ca --server-name --insecure</code></td></tr>
+  <tr><td><code>--serial COM3</code></td><td>With <code>--baud --parity E|N|O --data-bits --stop-bits --mode rtu|ascii --remove-echo</code></td></tr>
+  <tr><td><code>--connection FILE</code></td><td>The connection saved in a workspace</td></tr>
+</table>
+<p>Common options: <code>--unit</code> (default 1), <code>--timeout</code>, <code>--connect-timeout</code>, <code>--delay</code>, <code>--log</code> (frames to stderr), <code>--json</code>. Numbers can be decimal or hex (<code>0x10</code>).</p>
+<h3>Exit codes</h3>
+<table>
+  <tr><th>Code</th><th>Meaning</th></tr>
+  <tr><td>0</td><td>Success</td></tr>
+  <tr><td>1</td><td>The slave returned a Modbus exception</td></tr>
+  <tr><td>2</td><td>Communication error: timeout, CRC, no connection</td></tr>
+  <tr><td>3</td><td>Wrong command line</td></tr>
+</table>
+<h3>Examples</h3>
+<pre>mbm read --tcp 192.168.1.10 --address 0 --count 10
+mbm read --serial COM3 --baud 19200 --parity N --unit 5 --fc 4 --address 100 --count 2 --format float --byte-order cdab
+mbm write --tcp 192.168.1.10 --address 40 --values 1500
+mbm write --rtu-tcp 10.0.0.7:4001 --unit 3 --coils --address 0 --values 1,0,1
+mbm read --tcp plc --count 4 --json --watch --interval 500 --csv trend.csv
+mbm scan --serial COM3 --baud 9600 --units 1-32</pre>
+<h3>PowerShell</h3>
+<pre>$r = mbm read --tcp 192.168.1.10 --count 2 --format float --json | ConvertFrom-Json
+if ($LASTEXITCODE -ne 0) { throw "read failed" }
+$r.values[0].value</pre>
+<h3>Python</h3>
+<pre>import json, subprocess
+out = subprocess.run(["mbm", "read", "--tcp", "192.168.1.10", "--count", "4", "--json"],
+                     capture_output=True, text=True, check=True)
+print(json.loads(out.stdout)["values"])</pre>
+
+<h2 id="library">21. .NET library</h2>
+<p><code>ModbusMaster.Core.dll</code> contains the whole Modbus engine. Use it from C#, F# or PowerShell for scripts that need more than mbm offers.</p>
+<pre>Add-Type -Path "C:\path\to\ModbusMaster\ModbusMaster.Core.dll"
+$s = [ModbusMaster.Core.ConnectionSettings]::new()
+$s.Kind = "Tcp"; $s.Host = "192.168.1.10"; $s.Port = 502
+$c = [ModbusMaster.Core.ModbusConnection]::Create($s)
+$c.Open()
+$c.ReadHoldingRegisters(1, 0, 10)
+$c.WriteSingleRegister(1, 40, 1500)
+$c.Dispose()</pre>
+<p>PowerShell 7.5 or later loads .NET 10 libraries. Windows PowerShell 5.1 cannot; use mbm there.</p>
+
+<h2 id="errors">22. Errors and exceptions</h2>
+<p>Errors appear in red in the second line of each data window.</p>
+<h3>Modbus exception codes</h3>
+<p>An exception means the device received the request and refused it.</p>
+<table>
+  <tr><th>Code</th><th>Name</th><th>Usual cause</th></tr>
+  <tr><td>01</td><td>Illegal Function</td><td>The device does not support this function code.</td></tr>
+  <tr><td>02</td><td>Illegal Data Address</td><td>The address, or address + quantity, is outside the device's range. Check the address offset (40001 = 0).</td></tr>
+  <tr><td>03</td><td>Illegal Data Value</td><td>The quantity or the written value is not allowed.</td></tr>
+  <tr><td>04</td><td>Server Device Failure</td><td>The device had an internal error while executing the request.</td></tr>
+  <tr><td>05</td><td>Acknowledge</td><td>The device accepted a long-running request; poll later.</td></tr>
+  <tr><td>06</td><td>Server Device Busy</td><td>Retry later.</td></tr>
+  <tr><td>08</td><td>Memory Parity Error</td><td>Device memory error.</td></tr>
+  <tr><td>0A</td><td>Gateway Path Unavailable</td><td>The gateway has no route to that unit ID.</td></tr>
+  <tr><td>0B</td><td>Gateway Target Device Failed To Respond</td><td>The gateway forwarded the request but the serial device did not answer.</td></tr>
+</table>
+<h3>Communication errors</h3>
+<table>
+  <tr><th>Message</th><th>Check</th></tr>
+  <tr><td>Timeout error</td><td>No answer in time. Serial: baud rate, parity, data and stop bits, RTU/ASCII mode, slave ID, wiring (A/B swapped), termination. TCP: IP address, port, unit ID, firewall. Increase the response timeout for slow devices.</td></tr>
+  <tr><td>CRC/LRC error</td><td>The answer was damaged: noise, wrong baud rate, missing termination, two masters on the bus.</td></tr>
+  <tr><td>Response from slave ID x, expected y</td><td>Another device answered, or the gateway changes the unit ID.</td></tr>
+  <tr><td>Byte count error / response does not echo the request</td><td>The answer is valid Modbus but not the expected size or address. Some devices limit the quantity per request.</td></tr>
+  <tr><td>Incomplete response</td><td>Only part of a frame arrived. Increase the response timeout or the delay between polls.</td></tr>
+  <tr><td>Connection timeout / connection failed</td><td>The TCP connection could not be opened. Ping the device and check the port (502, or 802 for TLS).</td></tr>
+  <tr><td>COMx is in use by another program</td><td>Close the other program that holds the port.</td></tr>
+  <tr><td>The serial port is closed. Disconnected USB/serial converter?</td><td>The adapter was unplugged. Reconnect it and press <kbd>F5</kbd>.</td></tr>
+  <tr><td>TLS connection failed</td><td>Certificate not trusted, wrong server name, missing or wrong client certificate, or the device needs a different TLS version.</td></tr>
+</table>
+<h3 id="errors-open">OpenConnection error numbers</h3>
+<table>
+  <tr><th>Number</th><th>Meaning</th></tr>
+  <tr><td>0</td><td>Success</td></tr>
+  <tr><td>1</td><td>Serial port not available or in use</td></tr>
+  <tr><td>4</td><td>The serial port driver did not accept the settings</td></tr>
+  <tr><td>13</td><td>TCP/UDP or TLS connection failed</td></tr>
+  <tr><td>14</td><td>TCP connection timeout</td></tr>
+  <tr><td>17</td><td>Socket error</td></tr>
+  <tr><td>21</td><td>Invalid address or host not found</td></tr>
+  <tr><td>255</td><td>Connection already open</td></tr>
+</table>
+
+<h2 id="shortcuts">23. Keyboard shortcuts</h2>
+<table>
+  <tr><th>Key</th><th>Action</th><th>Key</th><th>Action</th></tr>
+  <tr><td><kbd>F1</kbd></td><td>Help</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd></td><td>New window</td></tr>
+  <tr><td><kbd>F3</kbd></td><td>Connect</td><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Open workspace</td></tr>
+  <tr><td><kbd>F4</kbd></td><td>Disconnect</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Save workspace</td></tr>
+  <tr><td><kbd>F5</kbd></td><td>Quick connect</td><td><kbd>Ctrl</kbd>+<kbd>F4</kbd></td><td>Close window</td></tr>
+  <tr><td><kbd>F6</kbd></td><td>Read/Write once</td><td><kbd>Ctrl</kbd>+<kbd>T</kbd></td><td>Test Center</td></tr>
+  <tr><td><kbd>F7</kbd></td><td>Communication traffic</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd></td><td>Link to chart</td></tr>
+  <tr><td><kbd>F8</kbd></td><td>Read/Write definition</td><td><kbd>Alt</kbd>+<kbd>S/U/H/B</kbd></td><td>Signed / Unsigned / Hex / Binary</td></tr>
+  <tr><td><kbd>Enter</kbd>, double click</td><td>Write the selected value</td><td></td><td></td></tr>
+</table>
+
+</main>
+</body>
+</html>

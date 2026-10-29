@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ModbusMaster.App/ModbusMaster.App.csproj" />
+    <Project Path="src/ModbusMaster.Cli/ModbusMaster.Cli.csproj" />
+    <Project Path="src/ModbusMaster.Core/ModbusMaster.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ModbusMaster.Tests/ModbusMaster.Tests.csproj" />
+  </Folder>
+</Solution>

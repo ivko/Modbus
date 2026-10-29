@@ -252,15 +252,18 @@ public sealed class PollDocument
     }
 
     /// <summary>True when cell <paramref name="index"/> is covered by a multi-register value that starts earlier.</summary>
-    public bool IsContinuation(int index)
+    public bool IsContinuation(int index) => ValueStart(index) != index;
+
+    /// <summary>First cell of the value that covers <paramref name="index"/> (itself unless a 32/64-bit value starts earlier).</summary>
+    public int ValueStart(int index)
     {
-        if (Definition.IsBits) return false;
+        if (Definition.IsBits) return index;
         for (var back = 1; back <= 3 && index - back >= 0; back++)
         {
             var c = PeekCell(index - back);
-            if (c is not null && c.Format.Registers() > back) return true;
+            if (c is not null && c.Format.Registers() > back) return index - back;
         }
-        return false;
+        return index;
     }
 
     public double NumericValue(int index, ushort[]? values = null)

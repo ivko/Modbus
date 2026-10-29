@@ -16,9 +16,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Version>1.0.0</Version>
     <Product>Modbus Master</Product>
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <Resource Include="app.ico" />
     <Content Include="..\..\docs\manual\**\*" LinkBase="manual" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\examples\**\*" LinkBase="examples" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

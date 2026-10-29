@@ -40,7 +40,7 @@ public sealed class MainWindow : Window
         Width = 1000;
         Height = 680;
         UseLayoutRounding = true;
-        Icon = AppIcon.Create();
+        AppIcon.Apply(this);
 
         var menu = new Menu { Padding = new Thickness(2) };
 

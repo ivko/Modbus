@@ -32,6 +32,7 @@ public abstract class ScanWindowBase : Window
 
     protected ScanWindowBase(string title, string help, string keyHeader)
     {
+        AppIcon.Apply(this);
         Title = title;
         _help = help;
         Width = 560;

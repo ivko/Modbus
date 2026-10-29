@@ -44,6 +44,7 @@ public sealed class TrafficWindow : Window
 
     private TrafficWindow(ITrafficSource source)
     {
+        AppIcon.Apply(this);
         _source = source;
         Title = "Communication Traffic";
         Width = 760;

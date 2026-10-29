@@ -1,27 +1,40 @@
-using System.Globalization;
+using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace Modbus.Ui;
 
-/// <summary>Draws the window icon: a blue tile with "MM".</summary>
+/// <summary>
+/// The icon of the running program (blue "M" for the master, green "S" for the slave), loaded from the
+/// app.ico resource of the program. Every top-level window of the program uses it.
+/// </summary>
 public static class AppIcon
 {
-    public static BitmapSource Create()
+    private static ImageSource? _current;
+
+    public static ImageSource? Current
     {
-        const int size = 64;
-        var visual = new DrawingVisual();
-        using (var dc = visual.RenderOpen())
+        get
         {
-            dc.DrawRoundedRectangle(new SolidColorBrush(Color.FromRgb(0x1F, 0x5F, 0xAF)), null, new Rect(2, 2, size - 4, size - 4), 12, 12);
-            var text = new FormattedText("MM", CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
-                new Typeface(new FontFamily("Segoe UI"), FontStyles.Normal, FontWeights.Bold, FontStretches.Normal), 26, Brushes.White, 1.0);
-            dc.DrawText(text, new Point((size - text.Width) / 2, (size - text.Height) / 2));
+            if (_current is not null) return _current;
+            try
+            {
+                var frame = BitmapFrame.Create(new Uri("pack://application:,,,/app.ico", UriKind.Absolute));
+                frame.Freeze();
+                _current = frame;
+            }
+            catch (Exception ex) when (ex is IOException or UriFormatException or NotSupportedException or InvalidOperationException)
+            {
+                // No app.ico resource: keep the default window icon.
+            }
+            return _current;
         }
-        var bmp = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
-        bmp.Render(visual);
-        bmp.Freeze();
-        return bmp;
+    }
+
+    /// <summary>Sets the program icon on a window (no-op when there is none).</summary>
+    public static void Apply(Window window)
+    {
+        if (Current is { } icon) window.Icon = icon;
     }
 }

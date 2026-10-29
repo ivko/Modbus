@@ -184,8 +184,9 @@ public sealed class PollView : DockPanel
     {
         get
         {
-            var list = Grid.SelectedItems.Cast<CellRow>().Select(r => r.Index).OrderBy(i => i).ToList();
-            if (list.Count == 0 && Grid.CurrentItem is CellRow current) list.Add(current.Index);
+            // A greyed register that belongs to a 32/64-bit value stands for the whole value.
+            var list = Grid.SelectedItems.Cast<CellRow>().Select(r => Document.ValueStart(r.Index)).Distinct().Order().ToList();
+            if (list.Count == 0 && Grid.CurrentItem is CellRow current) list.Add(Document.ValueStart(current.Index));
             return list;
         }
     }
@@ -237,8 +238,11 @@ public sealed class PollView : DockPanel
             }
             if (d.IsContinuation(row.Index))
             {
-                row.Value = "";
+                // Second, third or fourth register of a 32/64-bit value: show the raw register, greyed.
+                var start = d.ValueStart(row.Index);
+                row.Value = $"0x{values[row.Index]:X4}   (part of {_rows[start].Address})";
                 row.Background = Brushes.Transparent;
+                row.Foreground = Brushes.Gray;
                 continue;
             }
             row.Value = d.FormatCell(row.Index, values);

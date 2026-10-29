@@ -93,3 +93,18 @@ public class ProtocolTests
         Assert.Equal((0xFFFFFF, 0), c.Evaluate(50));
     }
 }
+
+public class CellLayoutTests
+{
+    [Fact]
+    public void Registers_of_a_multi_register_value_point_to_its_start()
+    {
+        var doc = new Modbus.Core.Polling.PollDocument { Definition = new Modbus.Core.Polling.PollDefinition { Quantity = 10 } };
+        doc.Cell(2).Format = DisplayFormat.FloatBigEndian;   // registers 2-3
+        doc.Cell(5).Format = DisplayFormat.DoubleBigEndian;  // registers 5-8
+        Assert.Equal(new[] { 0, 1, 2, 2, 4, 5, 5, 5, 5, 9 }, Enumerable.Range(0, 10).Select(doc.ValueStart));
+        Assert.False(doc.IsContinuation(2));
+        Assert.True(doc.IsContinuation(3));
+        Assert.True(doc.IsContinuation(8));
+    }
+}

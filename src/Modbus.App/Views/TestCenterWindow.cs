@@ -34,6 +34,7 @@ public sealed class TestCenterWindow : Window
 
     public TestCenterWindow()
     {
+        AppIcon.Apply(this);
         Title = "Test Center";
         Width = 820;
         Height = 520;

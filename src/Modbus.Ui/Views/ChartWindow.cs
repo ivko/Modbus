@@ -248,6 +248,7 @@ public sealed class ChartWindow : Window
 
     public ChartWindow(PollDocument doc)
     {
+        AppIcon.Apply(this);
         _doc = doc;
         Title = $"Chart - {doc.Title}";
         Width = 900;

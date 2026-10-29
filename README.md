@@ -63,5 +63,5 @@ examples          Excel VBA, Python, VBScript, PowerShell, Test Center strings
 
 ## NuGet cache
 
-`nuget.config` sets `globalPackagesFolder`, the folder where NuGet keeps downloaded packages.
-Change it to a folder that exists on your machine, or remove that line to use the NuGet default.
+`nuget.config` keeps downloaded NuGet packages in `packages`, next to it in the repository folder.
+The folder is ignored by git and is filled by the first build.

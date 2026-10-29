@@ -369,7 +369,7 @@ public sealed class SlaveEngine : IServerHandler, IDisposable
         foreach (var window in Windows)
         {
             var def = window.Definition;
-            foreach (var (index, cell) in window.Cells.ToArray())
+            foreach (var (index, cell) in window.CellSnapshot())
             {
                 if (cell.Simulation is not { Mode: not SimulationMode.None } sim || index >= def.Quantity) continue;
                 var key = (window, index);

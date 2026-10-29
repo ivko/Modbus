@@ -124,6 +124,12 @@ public sealed class PollDocument
         lock (_sync) return Cells.GetValueOrDefault(index);
     }
 
+    /// <summary>Thread-safe copy of the cell settings (for background threads).</summary>
+    public KeyValuePair<int, CellSettings>[] CellSnapshot()
+    {
+        lock (_sync) return Cells.ToArray();
+    }
+
     /// <summary>Snapshot of the last values read (registers, or 0/1 for bits).</summary>
     [JsonIgnore]
     public ushort[] Values

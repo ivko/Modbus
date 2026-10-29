@@ -87,7 +87,7 @@ public sealed class MainWindow : Window
         display.Items.Add(new Separator());
         Item(display, "C_ommunication...", () => TrafficWindow.ShowSingle(State.Traffic), Key.F7);
         Item(display, "_Real Time Charting...", () => WithCurrent(v => OpenChart(v)));
-        Item(display, "_Link to Chart", () => WithCurrent(v => OpenChart(v).Link(v.SelectedIndices)), Key.L, ModifierKeys.Control);
+        Item(display, "_Link to Chart", () => WithCurrent(v => OpenChart(v, linkSelection: false).Link(v.SelectedIndices)), Key.L, ModifierKeys.Control);
 
         var sim = TopMenu(menu, "S_imulation");
         Item(sim, "_Value Simulation...", () => EditCells(SlaveDialogs.ValueSimulation), Key.F9);
@@ -387,7 +387,8 @@ public sealed class MainWindow : Window
         }
     }
 
-    private ChartWindow OpenChart(PollView view)
+    /// <summary>Opens (or activates) the chart of a window. A new chart links the selected cells unless <paramref name="linkSelection"/> is false.</summary>
+    private ChartWindow OpenChart(PollView view, bool linkSelection = true)
     {
         if (!_charts.TryGetValue(view.Document, out var chart))
         {
@@ -395,7 +396,7 @@ public sealed class MainWindow : Window
             chart.Closed += (_, _) => _charts.Remove(view.Document);
             _charts[view.Document] = chart;
             chart.Show();
-            if (view.SelectedIndices.Count > 0) chart.Link(view.SelectedIndices);
+            if (linkSelection && view.SelectedIndices.Count > 0) chart.Link(view.SelectedIndices);
         }
         else
         {

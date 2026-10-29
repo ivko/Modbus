@@ -79,6 +79,7 @@
   <li><b>ModbusMaster.exe</b>, the Windows program with data windows, charts, logging, scans and the Test Center.</li>
   <li><b>mbm.exe</b>, a command line tool for batch files, PowerShell and any other scripting language. See <a href="#cli">chapter 20</a>.</li>
   <li><b>Automation (COM)</b>: Excel VBA, VBScript, Python and other COM clients can control the program. The interface uses the same member names and numbers as Modbus Poll. See <a href="#automation">chapter 19</a>.</li>
+  <li><b>ModbusSlave.exe</b>, the companion slave simulator. It plays one or more devices, with value simulation and error simulation, so you can test a master without hardware. See the <a href="slave.html">Modbus Slave manual</a>.</li>
 </ul>
 <h3>Supported connections</h3>
 <ul>
@@ -102,6 +103,8 @@
   <tr><td>17</td><td>Report Server ID</td><td>Functions menu, mbm</td></tr>
   <tr><td>22</td><td>Mask Write Register</td><td>Functions menu, mbm</td></tr>
   <tr><td>23</td><td>Read/Write Multiple Registers</td><td>Data window, Functions menu, mbm</td></tr>
+  <tr><td>11</td><td>Get Comm Event Counter</td><td>mbm (<code>events</code>)</td></tr>
+  <tr><td>43/14</td><td>Read Device Identification</td><td>mbm (<code>devid</code>)</td></tr>
 </table>
 <h3>System requirements</h3>
 <p>Windows 10 or 11, 64-bit, with the .NET 10 Desktop Runtime. A self-contained build needs no runtime.</p>
@@ -114,7 +117,8 @@
   <li>The window now reads the registers every scan rate. Double click a value to write a new one.</li>
   <li>Press <kbd>Ctrl</kbd>+<kbd>N</kbd> for more windows, for example another slave ID or another address range. All windows share the connection.</li>
 </ol>
-<p>No device at hand? Start the built-in simulator from a command prompt and connect to <code>127.0.0.1</code> port <code>1502</code>:</p>
+<p>No device at hand? Start <b>ModbusSlave.exe</b>, press <kbd>F3</kbd>, choose Modbus TCP/IP port <code>1502</code>, and connect Modbus Master to <code>127.0.0.1</code> port <code>1502</code>. Modbus Slave can also change values by itself and simulate faulty devices; see its <a href="slave.html">manual</a>.</p>
+<p>For a quick test without a window, the command line has a minimal simulator:</p>
 <pre>mbm serve --port 1502 --simulate</pre>
 <p>With <code>--simulate</code>, input registers 0 to 2 change every second, so you can try charts and logging.</p>
 
@@ -532,11 +536,14 @@ WScript.Echo doc.ReadResult() &amp; " " &amp; doc.URegisters(0)</pre>
   <tr><td>rw</td><td>Function 23. <code>--read-address --read-count --write-address --values</code></td></tr>
   <tr><td>id</td><td>Function 17</td></tr>
   <tr><td>diag</td><td>Function 08. <code>--sub --data</code></td></tr>
+  <tr><td>devid</td><td>Function 43/14 Read Device Identification. <code>--code 1|2|3|4 --object N</code> (1 basic, 2 regular, 4 one object)</td></tr>
+  <tr><td>events</td><td>Function 11 Get Comm Event Counter</td></tr>
   <tr><td>raw</td><td>Any PDU: <code>--pdu "03 00 00 00 0A"</code>; prints the response PDU</td></tr>
   <tr><td>scan</td><td>Slave scan: <code>--units 1-247</code></td></tr>
   <tr><td>scan-addresses</td><td>Address scan: <code>--addresses 0-9999 --block 100</code></td></tr>
   <tr><td>ports</td><td>Lists serial ports</td></tr>
-  <tr><td>serve</td><td>Slave simulator: <code>--port 502 --framing tcp|rtu|ascii --simulate --units 1-5 --log</code></td></tr>
+  <tr><td>serve</td><td>Minimal TCP slave simulator: <code>--port 502 --framing tcp|rtu|ascii --simulate --units 1-5 --log</code>. One shared memory for all slave IDs. For several devices, serial or UDP, value and error simulation use <a href="slave.html">Modbus Slave</a>.</td></tr>
+  <tr><td>version</td><td>Shows the version</td></tr>
 </table>
 <h3>Connections</h3>
 <table>

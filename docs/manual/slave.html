@@ -237,6 +237,7 @@ doc.ShowWindow</pre>
   <li>Watch the traffic window on both sides. Modbus Master shows the same frames from the master's point of view.</li>
 </ol>
 <p>For automated tests, drive both programs from a script: Modbus Slave through automation, the master under test as usual, or Modbus Master's <code>mbm</code> command line, whose exit codes tell exactly what happened (0 ok, 1 exception, 2 communication error).</p>
+<p>The <code>examples/vbscript/slave_example.vbs</code> script next to the program builds a small device, starts it on port 1502 and turns on error simulation after 20 seconds. Run it with <code>cscript slave_example.vbs</code> and read the device with <code>mbm read --tcp 127.0.0.1:1502 --count 6 --format float</code>.</p>
 
 <h2 id="shortcuts">18. Keyboard shortcuts</h2>
 <table>
